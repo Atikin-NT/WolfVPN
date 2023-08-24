@@ -1,4 +1,5 @@
 import requests
+import json
 
 class Request:
     """
@@ -22,10 +23,10 @@ class Request:
             'password': self.password,
             'username': self.username,
         }
-        r = self.session.post(self.login_url, json=payload)
+        r = self.session.post(url=self.login_url, json=payload)
         return r.status_code
 
-    def _create_request(self, url:str, params: dict, type: str) -> any:
+    def _create_request(self, url:str, params: dict, type: str) -> (requests.Response, str):
         """делает GET или POST запрос сопределенными параметрами
 
         Args:
@@ -34,9 +35,11 @@ class Request:
             type (str): тип запроса: GET или POST
 
         Returns:
-            any: В случае успеха будет возращен либо JSON объект либо True. В случае ошибки будет False
+            any: Возращает пару: requests.Response и exeption. Если ошибки не было, то exeption = None,
+            иначе - str (сообщение об ошибке)
         """
-        result = False
+        result = requests.Response()
+        exeption = None
         current_request = {
             'GET': lambda url, params: self.session.get(url, params=params),
             'POST': lambda url, params: self.session.post(url, json=params),
@@ -44,24 +47,23 @@ class Request:
         try:
             r = current_request[type](url, params)
             
-            if r.text != 'true':
+            if 'redirect' in r.url:
                 status_code = self._login()
                 assert status_code == 200
 
                 r = current_request[type](url, params)
                 assert r.status_code == 200
 
-                result = r.json() if type == 'GET' else True
+            result = r
             
         except requests.exceptions.InvalidURL:
-            print("Invalid URL", url)
+            exeption = f'Invalid URL: {url}'
         except Exception as ex:
-            print("Unknown error = ", ex)
+            exeption = f'Unknown error = {ex}'
+        return result, exeption
 
-        return result
-
-    def get(self, url: str, params: dict):
+    def get(self, url: str, params: dict) -> (requests.Response, str):
         return self._create_request(url, params, 'GET')
 
-    def post(self, url: str, params: dict):
+    def post(self, url: str, params: dict) -> (requests.Response, str):
         return self._create_request(url, params, 'POST')

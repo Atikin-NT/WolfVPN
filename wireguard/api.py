@@ -1,11 +1,19 @@
-from session import Request
-import utils
+from .session import Request
+from . import utils
+import requests
 
 class API:
 
     def __init__(self, password: str, username: str, login_url: str, main_url: str) -> None:
         self.request = Request(password, username, login_url)
         self.url = main_url
+
+    def _is_json(self, r: requests.Response) -> any:
+        try:
+            res = r.json()
+        except ValueError as e:
+            return False
+        return res
 
     def _available_ips(self, config_name: str) -> str:
         """получает список доступных ip адресов
@@ -17,10 +25,15 @@ class API:
             dict: список ip
         """
         url = self.url + f'/available_ips/{config_name}'
-        data = self.request.get(url, {})
-        if len(data) == 0:
-            return ''
-        return data[0]
+        data, err = self.request.get(url, {})
+        
+        data_json = self._is_json(data)
+        if err is None and data_json is not False:
+            data = data_json[0] if len(data_json) != 0 else ''
+        else:
+            data = ''
+        
+        return data
 
     def get_config(self, config_name: str, search="") -> any:
         """получение всех конфигурации с сервера
@@ -36,7 +49,14 @@ class API:
             'search': search
         }
         url = self.url + f'/get_config/{config_name}'
-        data = self.request.get(url, params)
+        data, err = self.request.get(url, params)
+
+        data_json = self._is_json(data)
+        if err is None and data_json is not False:
+            data = data_json
+        else:
+            data = False
+        
         return data
 
     def add_peer(self, config_name: str, data: dict) -> any:
@@ -50,18 +70,24 @@ class API:
             any: json объект или bool
         """
         if utils.check_param_peer_data(data) is False:
-            return "error"
+            raise ValueError('invalid data')
         params = utils.create_data_for_add_peer()
         params['name'] = data['username']
 
         avaliable_ip = self._available_ips(config_name)
         if avaliable_ip == '':
-            return 'error'
+            raise ValueError('no allowed ips')
         params['allowed_ips'] = avaliable_ip
 
         url = self.url + f'/add_peer/{config_name}'
-        data = self.request.post(url, params)
-        return data
+        data, err = self.request.post(url, params)
+
+        if err is None:
+            data = True if data.text == 'true' else False
+        else:
+            data = False
+
+        return data, params
 
     def remove_peer(self, config_name: str, peer_ids: list[str]) -> any:
         """удаление аккаунтов
@@ -79,7 +105,13 @@ class API:
         }
 
         url = self.url + f'/remove_peer/{config_name}'
-        data = self.request.post(url, params)
+        data, err = self.request.post(url, params)
+
+        if err is None:
+            data = True if data.text == 'true' else False
+        else:
+            data = False
+
         return data
 
     def get_peer_data(self, config_name: str, peer_id: str) -> any:
@@ -95,7 +127,14 @@ class API:
         params = { 'id': peer_id }
 
         url = self.url + f'/get_peer_data/{config_name}'
-        data = self.request.get(url, params)
+        data, err = self.request.post(url, params)
+
+        data_json = self._is_json(data)
+        if err is None and data_json is not False:
+            data = data_json
+        else:
+            data = False
+        
         return data
 
     def qrcode(self, config_name: str, peer_id: str) -> str:
@@ -111,7 +150,13 @@ class API:
         params = { 'id': peer_id }
 
         url = self.url + f'/qrcode/{config_name}'
-        data = self.request.get(url, params)
+        data, err = self.request.get(url, params)
+
+        if err is None:
+            data = data.text if 'data:image/png' in data.text else False
+        else:
+            data = False
+        
         return data
 
     def download(self, config_name: str, peer_id: str) -> any:
@@ -127,6 +172,13 @@ class API:
         params = { 'id': peer_id }
 
         url = self.url + f'/download/{config_name}'
-        data = self.request.get(url, params)
+        data, err = self.request.get(url, params)
+
+        data_json = self._is_json(data)
+        if err is None and data_json is not False:
+            data = data_json
+        else:
+            data = False
+        
         return data
     
