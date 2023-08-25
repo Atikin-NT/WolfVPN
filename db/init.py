@@ -27,7 +27,8 @@ class CreateTable:
             'main_url': 'text not null',
             'login_url': 'text not null',
             'password': 'text not null',
-            'username': 'text not null'
+            'username': 'text not null',
+            'region': 'text not null'
         })
         db.create_table('peers', {
             'client_id': 'bigint REFERENCES clients( id )',
@@ -36,8 +37,7 @@ class CreateTable:
             'params': 'jsonb not null'
             }, 'PRIMARY KEY (client_id, host_id)')
         db.create_table('codes', {
-            'id': 'serial PRIMARY KEY',
-            'code': 'text not null',
+            'code': 'serial PRIMARY KEY',
             'amount': 'int not null',
             'activated': 'bool default false'
         })

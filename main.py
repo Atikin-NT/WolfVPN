@@ -3,6 +3,7 @@ import aiogram
 import configparser
 from db.clients import AddClietn
 from db.pay_history import AddBill
+from db.init import CreateTable
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -15,6 +16,5 @@ if __name__ == '__main__':
         format="%(asctime)s %(levelname)s %(message)s",
         filemode="w"
     )
-    # AddClietn().execute(client_id=123, name='123')
-    AddBill().execute(client_id=123, amount=1)
+    CreateTable().execute()
     logging.info("test")

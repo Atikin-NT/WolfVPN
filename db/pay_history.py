@@ -1,12 +1,22 @@
 from .init import db
 from psycopg2.errors import ForeignKeyViolation
-
-class ClientNotExist(Exception):
-    "Клиента с таким индексом не существует"
+from .exeption import ClientNotExist
 
 class AddBill:
     "Создание нового чека в системе"
     def execute(self, client_id: int, amount: int) -> int:
+        """
+        Args:
+            client_id (int): id клиента
+            amount (int): сумма на чеке
+
+        Raises:
+            ValueError: значение чека меньше или равна нулю
+            ClientNotExist: Не существует клиента, на который хотят повеить чек
+
+        Returns:
+            int: id чека в таблице
+        """
         if amount <=0:
             raise ValueError("Amount below zero")
         try:
@@ -16,18 +26,36 @@ class AddBill:
         return int(bill_id)
 
 class UpdateBillStatus:
-    def execute(self, bill_id: int, amount: int):
-        if amount <= 0:
-            raise ValueError("Amount below zero")
+    "Обновление статуса чека"
+    def execute(self, bill_id: int, status: int):
+        """
+        Args:
+            bill_id (int): id чека
+            status (int): новый статус. 0-чек создан. 1-деньги отправлены. 2-деньги получены.
+
+        Raises:
+            ValueError: статус не соответствует нужным значениям
+        """
+        if status not in [0, 1, 2]:
+            raise ValueError("Invalid status")
         
         db.update(
             'pay_history',
-            {'amount': amount},
+            {'status': status},
             {'id': bill_id}
         )
 
 class GetClietnHistory:
+    "Получение истории операций пользователя"
     def execute(self, client_id: int):
+        """_summary_
+
+        Args:
+            client_id (int): id клиента
+
+        Returns:
+            list: список всех операций
+        """
         return db.select(
             'pay_history', 
             {'client_id': client_id}

@@ -1,8 +1,6 @@
 from .init import db
 from psycopg2.errors import UniqueViolation
-
-class ClientAlreadyExist(Exception):
-    "Клиент с таким индексом уже существует"
+from .exeption import ClientAlreadyExist
 
 class AddClietn:
     "Добавить нового клиента"
