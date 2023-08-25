@@ -35,3 +35,9 @@ class CreateTable:
             'create_date': 'date not null default CURRENT_DATE',
             'params': 'jsonb not null'
             }, 'PRIMARY KEY (client_id, host_id)')
+        db.create_table('codes', {
+            'id': 'serial PRIMARY KEY',
+            'code': 'text not null',
+            'amount': 'int not null',
+            'activated': 'bool default false'
+        })
