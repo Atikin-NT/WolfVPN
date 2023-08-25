@@ -27,7 +27,7 @@ class DataBaseManager():
         query += ')'
         self._execute(query)
 
-    def add(self, table_name: str, data: dict) -> None:
+    def add(self, table_name: str, data: dict, return_column=None) -> any:
         """добавление новой записи в таблицу
 
         Args:
@@ -38,14 +38,17 @@ class DataBaseManager():
         column_names = ', '.join(data.keys())
         column_values = tuple(data.values())
 
-        self._execute(
-            f'''
+        query = f'''
             INSERT INTO {table_name}
             ({column_names})
-            VALUES ({placeholders});
-            ''',
-            column_values
-        )
+            VALUES ({placeholders})
+            '''
+        if return_column:
+            query += f'RETURNING {return_column};'
+            return self._execute(query, column_values)
+        
+        query += ';'
+        self._execute(query, column_values)
     
     def delete (self, table_name: str, criteria: dict) -> None:
         """удаление записи из таблицы
