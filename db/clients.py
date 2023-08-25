@@ -22,7 +22,7 @@ class AddClietn:
         except UniqueViolation:
             raise ClientAlreadyExist()
 
-class UpdateClirentAmount:
+class UpdateClientAmount:
     "Обновить балан клиента"
     def execute(self, client_id: int, amount: int):
         """
@@ -49,6 +49,6 @@ class GetClientById:
             client_id (int): id клиента в телеге
 
         Returns:
-            _type_: результат в виде словаря
+            _type_: результат в виде словаря или None, если такого не существует
         """
         return db.select('clients', {'id': client_id}).fetchone()

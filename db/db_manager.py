@@ -105,7 +105,7 @@ class DataBaseManager():
         """
         criteria = criteria or {}
 
-        query = f'UPDATE {table_name} SET'
+        query = f'UPDATE {table_name} SET '
         column_names = ' = %s, '.join(data.keys())
         column_names += ' = %s'
         query += column_names
@@ -115,6 +115,7 @@ class DataBaseManager():
             placeholders = [f'{column} = %s' for column in criteria.keys()]
             select_criteria = ' AND '.join(placeholders)
             query += f' WHERE {select_criteria}'
+            column_values += tuple(criteria.values())
 
         self._execute(
             query,
