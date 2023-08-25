@@ -28,7 +28,13 @@ class DataBaseManager():
         self._execute(query)
 
     def add(self, table_name: str, data: dict) -> None:
-        placeholders = ', '.join('%s' * len(data))
+        """добавление новой записи в таблицу
+
+        Args:
+            table_name (str): название таблицы
+            data (dict): парамеры
+        """
+        placeholders = ', '.join(['%s'] * len(data))
         column_names = ', '.join(data.keys())
         column_values = tuple(data.values())
 
@@ -42,6 +48,12 @@ class DataBaseManager():
         )
     
     def delete (self, table_name: str, criteria: dict) -> None:
+        """удаление записи из таблицы
+
+        Args:
+            table_name (str): название таблицы
+            criteria (dict): критерий
+        """
         placeholders = [f'{column} = %s' for column in criteria.keys()]
         delete_criteria = ' AND '.join(placeholders)
         self._execute(
@@ -53,6 +65,17 @@ class DataBaseManager():
         )
 
     def select(self, table_name: str, criteria=None, order_by=None, limit=100):
+        """получить данные из таблицы
+
+        Args:
+            table_name (str): название таблицы
+            criteria (_type_, optional): критерий. Defaults to None.
+            order_by (_type_, optional): правила сортировки. Defaults to None.
+            limit (int, optional): количество записей. Defaults to 100.
+
+        Returns:
+            _type_: _description_
+        """
         criteria = criteria or {}
         
         query = f'SELECT * FROM {table_name}'
@@ -73,6 +96,13 @@ class DataBaseManager():
         )
     
     def update(self, table_name: str, data: dict, criteria=None) -> None:
+        """обновить запись в таблице
+
+        Args:
+            table_name (str): название таблицы
+            data (dict): данные, которые надо обновить
+            criteria (_type_, optional): критерий. Defaults to None.
+        """
         criteria = criteria or {}
 
         query = f'UPDATE {table_name} SET'

@@ -63,7 +63,25 @@ class Request:
         return result, exeption
 
     def get(self, url: str, params: dict) -> (requests.Response, str):
+        """осуществляет GET запрос с параметрами
+
+        Args:
+            url (str): url адрес 
+            params (params): параметры 
+
+        Returns:
+            _type_: (ответ сервера, ссобщение об ошибке или None)
+        """
         return self._create_request(url, params, 'GET')
 
     def post(self, url: str, params: dict) -> (requests.Response, str):
+        """осуществляет POST запрос с параметрами
+
+        Args:
+            url (str): url адрес 
+            params (params): параметры 
+
+        Returns:
+            _type_: (ответ сервера, ссобщение об ошибке или None)
+        """
         return self._create_request(url, params, 'POST')

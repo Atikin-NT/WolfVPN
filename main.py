@@ -1,7 +1,7 @@
 import logging
 import aiogram
 import configparser
-from db.idb import CreateTable
+from db.clients import AddClietn
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -14,5 +14,5 @@ if __name__ == '__main__':
         format="%(asctime)s %(levelname)s %(message)s",
         filemode="w"
     )
-    CreateTable().execute()
+    AddClietn().execute(client_id=123, name='123')
     logging.info("test")
