@@ -51,7 +51,9 @@ class GetPeerByClientId:
         Returns:
             list: список всех соединений
         """
-        return db.select('peers', {'client_id': client_id}).fetchall()
+        peers = db.select('peers', {'client_id': client_id}).fetchall()
+        res = [dict(peer) for peer in peers]
+        return res
 
 class GetPeerById:
     "Получение одного соединения по (client_id, host_id)"
