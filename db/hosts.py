@@ -1,4 +1,5 @@
 from .init import db
+import json
 
 class GetHostById:
     "Получить значения хоста по id"
@@ -19,4 +20,6 @@ class GetAllHosts:
         Returns:
             list: список всех хостов
         """
-        return db.select('hosts').fetchall()
+        hosts = db.select('hosts').fetchall()
+        res = [dict(host) for host in hosts]
+        return res
