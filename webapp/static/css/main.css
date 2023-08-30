@@ -1,0 +1,120 @@
+h4{
+	font-size: 1em;
+	font-family: 'RobotoMono-Regular';
+	font-weight: 400;
+	text-align: center;
+    margin-top: 10px;
+}
+
+button{
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    transition: all 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button:active{
+    background-color: #828594;
+}
+
+button:hover{
+    cursor: pointer;
+}
+
+.balance{
+    display: flex;
+    flex-direction: column;
+}
+
+.amount{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.amount p{
+    font-size: 2em;
+	font-family: 'RobotoMono-Bold';
+	font-weight: 700;
+    color: white;
+    margin: 10px 0;
+}
+
+.amount p span{
+    font-size: 0.7em;
+    color: #828594;
+}
+
+.amount button{
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+}
+
+.balance-days{
+    text-align: center;
+    font-size: 0.9em;
+	font-family: 'RobotoMono-Regular';
+	font-weight: 400;
+    color: #828594;
+}
+
+.action-list{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 60px;
+}
+
+.action button{
+    width: 110px;
+    height: 110px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.action p{
+    font-size: 1.5em;
+	font-family: 'RobotoMono-Bold';
+	font-weight: 700;
+    color: #7D94D8;
+    margin-top: 10px;
+}
+
+li {
+    justify-content: space-between;
+}
+
+.country{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.country p{
+    font-size: 0.8em;
+	font-family: 'RobotoMono-Light';
+	font-weight: 300;
+}
+
+.buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.buttons img{
+    margin: 10px;
+}
+
+.buttons button{
+    border-radius: 100%;
+}

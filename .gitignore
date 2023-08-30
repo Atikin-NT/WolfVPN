@@ -9,3 +9,4 @@
 /tests/wireguard/__pycache__
 /wireguard/__pycache__/
 /db/__pycache__/
+/webapp/__pycache__

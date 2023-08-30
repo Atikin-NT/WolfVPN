@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/telegram-web-app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/start.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/start.css') }}">
+    <title>Start</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать в <br>WolfVPN</h1>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" />
+        </div>
+        <div class="description">
+            <p>
+                Всем привет! Вы попали в первое VPN пирложение в формате web app  <br>🚀🚀🚀<br><br>
+Тут вы сможете с легкостью настроить ваш VPN, который будет быстро работать на Android, IOS, Windows и даже на Linux. Особонность нашего сервиса в том, что вам не нужно переплачивать за соединения, которые вам не нужны - выбираейте сами, за что вам платить, а за что нет 😉
+            </p>
+        </div>
+        <div class="avaliable-country-list">
+            <h1>Список доступных стран</h1>
+            <ul>
+                <li>
+                    <img src="{{ url_for('static', filename='images/russia.png') }}"/>
+                    <p>Россия</p>
+                </li>
+                <li>
+                    <img src="{{ url_for('static', filename='images/poland.png') }}"/>
+                    <p>Польша</p>
+                </li>
+            </ul>
+        </div>
+        <div class="cost">
+            <h1>Цены</h1>
+            <ul>
+                <li class="price">
+                    <p class="price-text">5 ₽/день или 150 ₽/мес за одно подключение</p>
+                </li>
+            </ul>
+        </div>
+        <!-- <div class="join">
+            <button id="join_btn">Join</button>
+        </div> -->
+    </div>
+</body>
+</html>
