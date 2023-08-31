@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from db.clients import GetClientById
 from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId
+from db.pay_history import GetClietnHistory
 import utils
 
 app = Flask(__name__)
@@ -37,8 +38,13 @@ def region_list():
 
 @app.route('/api/v1.0/user/<int:client_id>', methods=['GET'])
 def get_client(client_id: int):
-    client = GetClientById().execute(client_id)
     answer = json_template.copy()
+
+    client = GetClientById().execute(client_id)
+    if client is None:
+        answer['status'] = False
+        answer['data'] = 'User not found'
+        return jsonify(answer)
 
     client_peers = GetPeerByClientId().execute(client_id)
     client_peers = utils.get_permited_keys_from_dict_list(client_peers, ['client_id', 'host_id'])
@@ -50,6 +56,14 @@ def get_client(client_id: int):
                     for peer in client_peers]
     
     answer['data'] = {'amount': client['amount'], 'peers': client_peers}
+    return jsonify(answer)
+
+@app.route('/api/v1.0/bill_history/<int:client_id>', methods=['POST'])
+def bill_history(client_id: int):
+    bill_history = GetClietnHistory().execute(client_id)
+    answer = json_template.copy()
+
+    answer['data'] = {'bills': bill_history}
     return jsonify(answer)
 
 if __name__ == '__main__':

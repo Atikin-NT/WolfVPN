@@ -56,7 +56,9 @@ class GetClietnHistory:
         Returns:
             list: список всех операций
         """
-        return db.select(
-            'pay_history', 
-            {'client_id': client_id}
-        ).fetchall()
+        bills = db.select(
+                'pay_history', 
+                {'client_id': client_id}
+            ).fetchall()
+        res = [dict(bill) for bill in bills]
+        return res
