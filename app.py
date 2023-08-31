@@ -1,9 +1,25 @@
 from flask import Flask, jsonify
 from db.clients import GetClientById
 from db.hosts import GetAllHosts
-from db.peers import GetPeerByClientId
+from db.peers import GetPeerByClientId, GetPeerById
 from db.pay_history import GetClietnHistory
+
+from wireguard.api import API
 import utils
+
+import configparser
+config = configparser.ConfigParser()
+config.read('./config.ini')
+dashboard_config = config['dashboard']
+
+api = API(
+    dashboard_config['password'],
+    dashboard_config['login'],
+    dashboard_config['login_url'],
+    dashboard_config['base_url']
+)
+
+CONF_NAME = dashboard_config['config_name']
 
 app = Flask(__name__)
 
@@ -11,6 +27,8 @@ json_template = {
     'status': True,
     'data': ''
 }
+
+
  
 @app.route('/api/v1.0/check', methods=['GET'])
 def check():
@@ -64,6 +82,32 @@ def bill_history(client_id: int):
     answer = json_template.copy()
 
     answer['data'] = {'bills': bill_history}
+    return jsonify(answer)
+
+
+@app.route('/api/v1.0/qrcode/', methods=['POST'])
+def qrcode(client_id: int):
+    answer = json_template.copy()
+
+    request_data = request.get_json()
+
+    if 'client_id' not in request_data or 'host_id' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Client id and host id not presented'
+        return jsonify(answer)
+    
+    client_id = request_data['client_id']
+    host_id = request_data['host_id']
+
+    peer = GetPeerById().execute(client_id, host_id)
+    if peer is None:
+        answer['status'] = False
+        answer['data'] = 'Peer not found'
+        return jsonify(answer)
+
+    qrcode_str = api.qrcode(CONF_NAME, peer['params']['public_key'])
+
+    answer['data'] = {'qrcode': qrcode_str}
     return jsonify(answer)
 
 if __name__ == '__main__':
