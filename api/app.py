@@ -32,6 +32,7 @@ json_template = {
  
 @app.route('/api/v1.0/check', methods=['GET'])
 def check():
+    "Проверка связи"
     return jsonify(json_template)
 
 @app.route('/api/v1.0/check_user/<int:user_id>', methods=['GET'])
@@ -89,7 +90,7 @@ def bill_history(client_id: int):
 def qrcode(client_id: int):
     answer = json_template.copy()
 
-    request_data = request.get_json()
+    request_data = requests.get_json()
 
     if 'client_id' not in request_data or 'host_id' not in request_data:
         answer['status'] = False
