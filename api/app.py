@@ -1,8 +1,11 @@
-from flask import Flask, jsonify
-from db.clients import GetClientById
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import requests
+from db.clients import GetClientById, AddClient
 from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId, GetPeerById
 from db.pay_history import GetClietnHistory
+from db.exeption import *
 
 from wireguard.api import API
 import utils
@@ -22,12 +25,12 @@ api = API(
 CONF_NAME = dashboard_config['config_name']
 
 app = Flask(__name__)
+CORS(app)
 
 json_template = {
     'status': True,
     'data': ''
 }
-
 
  
 @app.route('/api/v1.0/check', methods=['GET'])
@@ -35,8 +38,15 @@ def check():
     "Проверка связи"
     return jsonify(json_template)
 
+# start page ----------
+
 @app.route('/api/v1.0/check_user/<int:user_id>', methods=['GET'])
 def user_login_check(user_id: int):
+    """Проверка на наличие пользователя в системе
+
+    Args:
+        user_id (int): id пользователя из телеги
+    """
     client = GetClientById().execute(user_id)
     answer = json_template.copy()
 
@@ -46,8 +56,40 @@ def user_login_check(user_id: int):
     
     return jsonify(answer)
  
+@app.route('/api/v1.0/add_user/', methods=['POST'])
+def add_user():
+    """Добавление нового пользователя в систему
+
+    Args:
+        client_id (int): id пользователя из телеги
+        name (str): имя пользователя
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+
+    if 'client_id' not in request_data or 'name' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Client id and name not presented'
+        return jsonify(answer)
+    
+    client_id = request_data['client_id']
+    name = request_data['name']
+
+    try:
+        AddClient().execute(client_id, name);
+    except ValueError:
+        answer['status'] = False
+        answer['data'] = 'name is empty'
+    except ClientAlreadyExist:
+        pass
+    
+    return jsonify(answer)
+
+# main page -----------
+
 @app.route('/api/v1.0/region_list', methods=['GET'])
 def region_list():
+    "Получить список серверов"
     regions = GetAllHosts().execute()
     regions = utils.get_permited_keys_from_dict_list(regions, ['id', 'region'])
     
@@ -55,8 +97,14 @@ def region_list():
     answer['data'] = regions
     return jsonify(answer)
 
+
 @app.route('/api/v1.0/user/<int:client_id>', methods=['GET'])
 def get_client(client_id: int):
+    """получение информации о пользователе
+
+    Args:
+        client_id (int): id пользователя из телеги
+    """
     answer = json_template.copy()
 
     client = GetClientById().execute(client_id)
@@ -77,8 +125,14 @@ def get_client(client_id: int):
     answer['data'] = {'amount': client['amount'], 'peers': client_peers}
     return jsonify(answer)
 
+
 @app.route('/api/v1.0/bill_history/<int:client_id>', methods=['POST'])
 def bill_history(client_id: int):
+    """получение чековой истории пользователя
+
+    Args:
+        client_id (int): id пользователя из телеги
+    """
     bill_history = GetClietnHistory().execute(client_id)
     answer = json_template.copy()
 
@@ -87,7 +141,16 @@ def bill_history(client_id: int):
 
 
 @app.route('/api/v1.0/qrcode/', methods=['POST'])
-def qrcode(client_id: int):
+def qrcode():
+    """получение qr кода кнкретного подключения
+
+    Args(POST):
+        client_id (int): id пользователя из телеги
+        host_id (int): id сервера из БД
+
+    Returns:
+        _type_: _description_
+    """
     answer = json_template.copy()
 
     request_data = requests.get_json()

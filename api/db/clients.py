@@ -2,7 +2,7 @@ from .init import db
 from psycopg2.errors import UniqueViolation
 from .exeption import ClientAlreadyExist
 
-class AddClietn:
+class AddClient:
     "Добавить нового клиента"
     def execute(self, client_id: int, name: str):
         """
