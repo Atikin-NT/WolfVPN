@@ -10,13 +10,17 @@
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/start.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_peer.css') }}">
     <title>Main</title>
 </head>
 <body>
     <div class="container">
-        <h4>QR code</h4>
-        
+        <h4>Возможные подключения</h4>
+        <div class="current-peers">
+            <ul id="current-peers-ul">
+            </ul>
+        </div>
     </div>
+    <script src="{{ url_for('static', filename='js/add_peer.js') }}"></script>
 </body>
-    <script src="{{ url_for('static', filename='js/qrcode.js') }}"></script>
 </html>

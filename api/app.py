@@ -1,9 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import requests
 from db.clients import GetClientById, AddClient
 from db.hosts import GetAllHosts
-from db.peers import GetPeerByClientId, GetPeerById
+from db.peers import GetPeerByClientId, GetPeerById, AddPeer
 from db.pay_history import GetClietnHistory
 from db.exeption import *
 
@@ -15,12 +14,15 @@ config = configparser.ConfigParser()
 config.read('./config.ini')
 dashboard_config = config['dashboard']
 
-api = API(
-    dashboard_config['password'],
-    dashboard_config['login'],
-    dashboard_config['login_url'],
-    dashboard_config['base_url']
-)
+all_confs = utils.create_ini_config_list(dict(dashboard_config))
+apis = []
+for conf in all_confs:
+    apis.append(API(
+        conf['password'],
+        conf['login'],
+        conf['login_url'],
+        conf['base_url']
+    ))
 
 DAY_PAY = int(config['economic']['day_pay'])
 CONF_NAME = dashboard_config['config_name']
@@ -132,6 +134,35 @@ def get_client(client_id: int):
     return jsonify(answer)
 
 
+@app.route('/api/v1.0/add_peer', methods=['POST'])
+def add_peer():
+    """добавить новое подключение
+
+    Args:
+        client_id (int): id пользователя из телеги
+        host_id (int): id хоста
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+    if 'username' not in request_data or 'client_id' not in request_data or 'host_id' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Not all values was presented'
+        return jsonify(answer)
+    username = request_data['username']
+    client_id = request_data['client_id']
+    host_id = int(request_data['host_id'])
+
+    try:
+        data, params = apis[host_id-1].add_peer('wg0', request_data)
+        AddPeer().execute(client_id, host_id, params)
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+        return jsonify(answer)
+    answer['data'] = 'ok'
+    return jsonify(answer)
+
+
 @app.route('/api/v1.0/bill_history/<int:client_id>', methods=['POST'])
 def bill_history(client_id: int):
     """получение чековой истории пользователя
@@ -159,7 +190,7 @@ def qrcode():
     """
     answer = json_template.copy()
 
-    request_data = requests.get_json()
+    request_data = request.get_json()
 
     if 'client_id' not in request_data or 'host_id' not in request_data:
         answer['status'] = False
@@ -179,6 +210,7 @@ def qrcode():
 
     answer['data'] = {'qrcode': qrcode_str}
     return jsonify(answer)
+
 
 if __name__ == '__main__':
     app.run(port=5001)

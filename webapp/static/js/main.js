@@ -20,6 +20,11 @@ function set_onclock_event(btn_list, event){
     }
 }
 
+function add_peer(){
+    console.log('add peer');
+    window.location.replace(`/add_peer`);
+}
+
 function qrcode(){
     let a = this.id.split('-')[1];
     window.location.replace(`/qrcode/${a}`);
@@ -83,9 +88,11 @@ function set_user_info(user_info){
 async function main(){
     let tg = window.Telegram.WebApp;
 
-    if (tg.MainButton.isVisiable){
-        tg.MainButton.hide();
-    }
+    tg.MainButton.setText('Добавить подключение');
+    tg.MainButton.show();
+    tg.MainButton.onClick(function(){
+        add_peer();
+    });
 
     tg.BackButton.hide();
 
