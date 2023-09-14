@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;700&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/telegram-web-app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/start.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <title>Main</title>
@@ -16,13 +17,13 @@
         <h4>Баланс</h4>
         <div class="balance">
             <div class="amount">
-                <p>187,00<span> ₽</span></p>
+                <p id="user_amount">00,00<span> ₽</span></p>
                 <button>
                     <img src="{{ url_for('static', filename='images/add_btn.svg') }}"/>
                 </button>
             </div>
             <div class="balance-days">
-                Хватит на 37 дней
+                Хватит на <span id="user_left_days">00</span> дней
             </div>
             <div class="action-list">
                 <div class="action">
@@ -41,35 +42,7 @@
         </div>
         <div class="current-peers">
             <h1>Текущие подключения</h1>
-            <ul>
-                <li>
-                    <div class="country">
-                        <img src="{{ url_for('static', filename='images/russia.png') }}"/>
-                        <p>Россия</p>
-                    </div>
-                    <div class="buttons">
-                        <button class="action-qrcode" id="qrcode-1">
-                            <img src="{{ url_for('static', filename='images/qrcode.svg') }}"/>
-                        </button>
-                        <button class="action-download" id="download-1">
-                            <img src="{{ url_for('static', filename='images/download.svg') }}"/>
-                        </button>
-                        <button class="action-delete" id="delete-1">
-                            <img src="{{ url_for('static', filename='images/delete.svg') }}"/>
-                        </button>
-                    </div>
-                </li>
-                <li>
-                    <div class="country">
-                        <img src="{{ url_for('static', filename='images/poland.png') }}"/>
-                        <p>Польша</p>
-                    </div>
-                    <div class="buttons">
-                        <img src="{{ url_for('static', filename='images/qrcode.svg') }}"/>
-                        <img src="{{ url_for('static', filename='images/download.svg') }}"/>
-                        <img src="{{ url_for('static', filename='images/delete.svg') }}"/>
-                    </div>
-                </li>
+            <ul id="current-peers-ul">
             </ul>
         </div>
     </div>

@@ -1,21 +1,25 @@
 from flask import Flask, render_template
 
 app = Flask(__name__)
- 
-@app.route('/')
+
+
+@app.route('/', methods=['GET'])
 def start():
     return render_template('start.html')
 
-@app.route('/main')
+
+@app.route('/main', methods=['GET'])
 def main():
     return render_template('main.html')
 
-@app.route('/bill')
-def bill():
+
+@app.route('/bill/<int:host_id>', methods=['GET'])
+def bill(host_id: int):
     return render_template('bill.html')
 
-@app.route('/qrcode')
-def qrcode():
+
+@app.route('/qrcode/<int:host_id>', methods=['GET'])
+def qrcode(host_id: int, methods=['GET']):
     return render_template('qrcode.html')
  
 

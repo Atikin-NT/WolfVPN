@@ -22,6 +22,7 @@ api = API(
     dashboard_config['base_url']
 )
 
+DAY_PAY = int(config['economic']['day_pay'])
 CONF_NAME = dashboard_config['config_name']
 
 app = Flask(__name__)
@@ -38,8 +39,8 @@ def check():
     "Проверка связи"
     return jsonify(json_template)
 
-# start page ----------
 
+# start page ----------
 @app.route('/api/v1.0/check_user/<int:user_id>', methods=['GET'])
 def user_login_check(user_id: int):
     """Проверка на наличие пользователя в системе
@@ -55,7 +56,8 @@ def user_login_check(user_id: int):
         answer['data']['user_exist'] = False
     
     return jsonify(answer)
- 
+
+
 @app.route('/api/v1.0/add_user/', methods=['POST'])
 def add_user():
     """Добавление нового пользователя в систему
@@ -85,7 +87,6 @@ def add_user():
     
     return jsonify(answer)
 
-# main page -----------
 
 @app.route('/api/v1.0/region_list', methods=['GET'])
 def region_list():
@@ -98,6 +99,7 @@ def region_list():
     return jsonify(answer)
 
 
+# main page -----------
 @app.route('/api/v1.0/user/<int:client_id>', methods=['GET'])
 def get_client(client_id: int):
     """получение информации о пользователе
@@ -122,7 +124,11 @@ def get_client(client_id: int):
     client_peers = [peer | {'region': utils.dict_search(regions, 'id', peer['host_id'], 'region')}
                     for peer in client_peers]
     
-    answer['data'] = {'amount': client['amount'], 'peers': client_peers}
+    answer['data'] = {
+        'amount': client['amount'],
+        'day_left': client['amount'] // DAY_PAY,
+        'peers': client_peers
+    }
     return jsonify(answer)
 
 
