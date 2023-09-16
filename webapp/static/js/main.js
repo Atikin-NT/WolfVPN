@@ -33,8 +33,29 @@ function qrcode(){
 
 
 // скачать подключение
-function download(){
+async function download(){
     tg.showAlert('Бот выслал вам файл для подключения');
+    const host_id = this.id.split('-')[1];
+    let res = await Request(SERVER_URL + `/api/v1.0/download`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify({
+            client_id: USER.id,
+            host_id: host_id,
+        })
+    });
+    if (res == null) {
+        tg.showAlert('Сервер не отвечает, напишите в тех поддержку');
+        return;
+    }
+    if (!res['status']) {
+        tg.showAlert('Ошибка сервера, напишите в тех поддержку');
+        return;
+    }
+
 }
 
 async function delete_callback(a){

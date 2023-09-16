@@ -5,7 +5,7 @@ from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId, GetPeerById, AddPeer, RemovePeer
 from db.pay_history import GetClietnHistory
 from db.exeption import *
-
+from bot import bot
 from wireguard.api import API
 import utils
 
@@ -184,9 +184,7 @@ def remove_peer():
         peer = GetPeerById().execute(client_id, host_id)
         if peer is None:
             raise InterruptedError("peer not exist")
-        print(peer['params']['public_key'])
         res = apis[host_id-1].remove_peer('wg0', [peer['params']['public_key']])
-        print(res)
         if res is False:
             raise InterruptedError("Can't remove")
         RemovePeer().execute(client_id, host_id)
@@ -244,6 +242,45 @@ def qrcode():
     qrcode_str = api.qrcode(CONF_NAME, peer['params']['public_key'])
 
     answer['data'] = {'qrcode': qrcode_str}
+    return jsonify(answer)
+
+
+@app.route('/api/v1.0/download', methods=['POST'])
+async def download():
+    """скачивание файла для подключения
+
+    Args(POST):
+        client_id (int): id пользователя из телеги
+        host_id (int): id сервера из БД
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+    if 'client_id' not in request_data or 'host_id' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Client id and host id not presented'
+        return jsonify(answer)
+
+    client_id = int(request_data['client_id'])
+    host_id = int(request_data['host_id'])
+
+    peer = GetPeerById().execute(client_id, host_id)
+    if peer is None:
+        answer['status'] = False
+        answer['data'] = 'Peer not found'
+        return jsonify(answer)
+
+    try:
+        file = apis[host_id-1].download('wg0', peer['params']['public_key'])
+        if file is False:
+            raise InterruptedError('can`t get file')
+        print(file)
+        await bot.send_document(client_id, (file['filename'], file['content']))
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+        return jsonify(answer)
+
+    answer['data'] = 'ok'
     return jsonify(answer)
 
 
