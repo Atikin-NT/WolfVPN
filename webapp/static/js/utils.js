@@ -13,5 +13,12 @@ async function Request(url, data){
     if (response.ok) {
         json = await response.json();
     }
+    console.log(json);
     return json;
+}
+
+function set_onclock_event(btn_list, event){
+    for (const element of btn_list){
+        element.onclick = event;
+    }
 }

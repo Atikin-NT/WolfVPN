@@ -14,30 +14,63 @@ let li_country = `<div class="country">
                         </button>
                     </div>`;
 
-function set_onclock_event(btn_list, event){
-    for (const element of btn_list){
-        element.onclick = event;
-    }
-}
+let ALL_USER_PEERS = [];
+let PEER_CHOICE = -1;
+const tg = window.Telegram.WebApp;
+const USER = tg.initDataUnsafe.user;
 
+// добавление новго подключения
 function add_peer(){
     console.log('add peer');
     window.location.replace(`/add_peer`);
 }
 
+// показ qr кода
 function qrcode(){
     let a = this.id.split('-')[1];
     window.location.replace(`/qrcode/${a}`);
 }
 
+
+// скачать подключение
 function download(){
     tg.showAlert('Бот выслал вам файл для подключения');
 }
 
-function delete_fun(){
-    tg.showConfirm('Вы уверены?', function(a){
-        console.log(a);
-    })
+async function delete_callback(a){
+    if (a == false){
+        return;
+    }
+
+    const host_id = PEER_CHOICE;
+    let res = await Request(SERVER_URL + `/api/v1.0/remove_peer`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify({
+            client_id: USER.id,
+            host_id: host_id,
+        })
+    });
+
+
+    if (res == null) {
+        tg.showAlert('Сервер не отвечает, напишите в тех поддержку');
+        return;
+    }
+    if (!res['status']) {
+        tg.showAlert('Ошибка сервера, напишите в тех поддержку');
+        return;
+    }
+    location.reload();
+}
+
+// удалить подключение
+async function delete_fun(){
+    PEER_CHOICE = this.id.split('-')[1];
+    tg.showConfirm('Вы уверены?', delete_callback);
 }
 
 let bill_history = document.getElementById('bill-history');
@@ -72,7 +105,6 @@ function set_user_info(user_info){
 
     let user_peers = user_info['peers'];
     let current_peers = document.getElementById('current-peers-ul');
-    console.log(user_peers.length);
 
     for (let i = 0; i < user_peers.length; i++) {
         let peer = user_peers[i];
@@ -86,7 +118,6 @@ function set_user_info(user_info){
 }
 
 async function main(){
-    let tg = window.Telegram.WebApp;
 
     tg.MainButton.setText('Добавить подключение');
     tg.MainButton.show();
@@ -96,10 +127,10 @@ async function main(){
 
     tg.BackButton.hide();
 
-    let user_id = tg.initDataUnsafe.user.id;
+    let user_id = USER.id;
 
     const user_info = await get_user_info(user_id);  // получение информации о пользователе
-    console.log(user_info);
+    ALL_USER_PEERS = user_info['peers'];
     set_user_info(user_info);  // обновление информации на странице
 
     let qrcode_btns = document.getElementsByClassName('action-qrcode');

@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db.clients import GetClientById, AddClient
 from db.hosts import GetAllHosts
-from db.peers import GetPeerByClientId, GetPeerById, AddPeer
+from db.peers import GetPeerByClientId, GetPeerById, AddPeer, RemovePeer
 from db.pay_history import GetClietnHistory
 from db.exeption import *
 
@@ -141,6 +141,7 @@ def add_peer():
     Args:
         client_id (int): id пользователя из телеги
         host_id (int): id хоста
+        username (str): ник пользователя
     """
     answer = json_template.copy()
     request_data = request.get_json()
@@ -148,13 +149,47 @@ def add_peer():
         answer['status'] = False
         answer['data'] = 'Not all values was presented'
         return jsonify(answer)
-    username = request_data['username']
     client_id = request_data['client_id']
     host_id = int(request_data['host_id'])
 
     try:
         data, params = apis[host_id-1].add_peer('wg0', request_data)
         AddPeer().execute(client_id, host_id, params)
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+        return jsonify(answer)
+    answer['data'] = 'ok'
+    return jsonify(answer)
+
+
+@app.route('/api/v1.0/remove_peer', methods=['POST'])
+def remove_peer():
+    """добавить новое подключение
+
+    Args:
+        client_id (int): id пользователя из телеги
+        host_id (int): id хоста
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+    if 'client_id' not in request_data or 'host_id' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Not all values was presented'
+        return jsonify(answer)
+    client_id = request_data['client_id']
+    host_id = int(request_data['host_id'])
+
+    try:
+        peer = GetPeerById().execute(client_id, host_id)
+        if peer is None:
+            raise InterruptedError("peer not exist")
+        print(peer['params']['public_key'])
+        res = apis[host_id-1].remove_peer('wg0', [peer['params']['public_key']])
+        print(res)
+        if res is False:
+            raise InterruptedError("Can't remove")
+        RemovePeer().execute(client_id, host_id)
     except Exception as msg:
         answer['status'] = False
         answer['data'] = str(msg)
