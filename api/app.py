@@ -5,11 +5,13 @@ from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId, GetPeerById, AddPeer, RemovePeer
 from db.pay_history import GetClietnHistory
 from db.exeption import *
-from bot import bot
+from bot import send_file_to_user
 from wireguard.api import API
+from aiogram.types.input_file import BufferedInputFile
 import utils
-
+import asyncio
 import configparser
+
 config = configparser.ConfigParser()
 config.read('./config.ini')
 dashboard_config = config['dashboard']
@@ -246,7 +248,7 @@ def qrcode():
 
 
 @app.route('/api/v1.0/download', methods=['POST'])
-async def download():
+def download():
     """скачивание файла для подключения
 
     Args(POST):
@@ -274,7 +276,11 @@ async def download():
         if file is False:
             raise InterruptedError('can`t get file')
         print(file)
-        await bot.send_document(client_id, (file['filename'], file['content']))
+        file_content, file_title = file['content'], file['filename']
+        file = bytes(file_content, 'utf-8')
+        input_file = BufferedInputFile(file=file, filename=file_title)
+
+        asyncio.run(send_file_to_user(client_id, input_file))
     except Exception as msg:
         answer['status'] = False
         answer['data'] = str(msg)

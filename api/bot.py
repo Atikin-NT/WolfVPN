@@ -1,8 +1,8 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TEST
-
 import configparser
+
 config = configparser.ConfigParser()
 config.read('./config.ini')
 bot_config = config['bot-test']
@@ -17,6 +17,10 @@ if is_test:
 else:
     session = None
 
-
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
+
+
+async def send_file_to_user(client_id, input_file):
+    await bot.session.close()
+    await bot.send_document(client_id, document=input_file)
