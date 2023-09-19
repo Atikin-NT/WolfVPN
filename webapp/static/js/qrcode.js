@@ -9,6 +9,12 @@ tg.BackButton.onClick(function(){
     window.location.replace("http://127.0.0.1:5000/main");
 })
 
+function set_qrcode_from_str(qr_str){
+    let img = document.getElementById('qrcode');
+    img.src = qr_str;
+}
+
+
 async function get_qr_code(user_id) {
     const host_id_split = document.URL.split('/');
     const host_id = host_id_split[host_id_split.length - 1];
@@ -26,6 +32,7 @@ async function get_qr_code(user_id) {
     });
 
     console.log(res);
+    set_qrcode_from_str(res['data']['qrcode']);
 }
 
 
@@ -38,7 +45,7 @@ async function main(){
 
     tg.BackButton.show()
     tg.BackButton.onClick(function(){
-        window.location.replace("http://127.0.0.1:5000/main");
+        window.location.replace(WEB_APP__URL + '/main');
     })
 
     const user_id = tg.initDataUnsafe.user.id;

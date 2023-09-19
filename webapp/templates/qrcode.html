@@ -10,11 +10,15 @@
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/start.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/qrcode.css') }}">
     <title>Main</title>
 </head>
 <body>
     <div class="container">
         <h4>QR code</h4>
+        <div class="img">
+            <img id="qrcode" src=""/>
+        </div>
         
     </div>
 </body>

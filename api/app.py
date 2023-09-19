@@ -219,31 +219,30 @@ def qrcode():
     Args(POST):
         client_id (int): id пользователя из телеги
         host_id (int): id сервера из БД
-
-    Returns:
-        _type_: _description_
     """
     answer = json_template.copy()
-
     request_data = request.get_json()
-
     if 'client_id' not in request_data or 'host_id' not in request_data:
         answer['status'] = False
         answer['data'] = 'Client id and host id not presented'
         return jsonify(answer)
-    
-    client_id = request_data['client_id']
-    host_id = request_data['host_id']
 
-    peer = GetPeerById().execute(client_id, host_id)
-    if peer is None:
+    client_id = int(request_data['client_id'])
+    host_id = int(request_data['host_id'])
+
+    try:
+        peer = GetPeerById().execute(client_id, host_id)
+        if peer is None:
+            answer['status'] = False
+            answer['data'] = 'Peer not found'
+            return jsonify(answer)
+
+        qrcode_str = apis[host_id-1].qrcode('wg0', peer['params']['public_key'])
+        answer['data'] = {'qrcode': qrcode_str}
+    except Exception as msg:
         answer['status'] = False
-        answer['data'] = 'Peer not found'
-        return jsonify(answer)
+        answer['data'] = str(msg)
 
-    qrcode_str = api.qrcode(CONF_NAME, peer['params']['public_key'])
-
-    answer['data'] = {'qrcode': qrcode_str}
     return jsonify(answer)
 
 
