@@ -26,6 +26,11 @@ def bill(host_id: int):
 @app.route('/qrcode/<int:host_id>', methods=['GET'])
 def qrcode(host_id: int):
     return render_template('qrcode.html')
+
+
+@app.route('/coupon', methods=['GET'])
+def coupon():
+    return render_template('coupon.html')
  
 
 if __name__ == '__main__':

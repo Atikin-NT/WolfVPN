@@ -94,6 +94,11 @@ async function delete_fun(){
     tg.showConfirm('Вы уверены?', delete_callback);
 }
 
+// активация купона
+function coupon(){
+    window.location.replace(`/coupon`);
+}
+
 let bill_history = document.getElementById('bill-history');
 bill_history.onclick = function(){
     window.location.replace("http://127.0.0.1:5000/bill");
@@ -157,10 +162,12 @@ async function main(){
     let qrcode_btns = document.getElementsByClassName('action-qrcode');
     let download_btns = document.getElementsByClassName('action-download');
     let delete_btns = document.getElementsByClassName('action-delete');
+    let coupon_btns = document.getElementsByClassName('coupon');
 
     set_onclock_event(qrcode_btns, qrcode);
     set_onclock_event(download_btns, download);
     set_onclock_event(delete_btns, delete_fun);
+    set_onclock_event(coupon_btns, coupon);
 }
 
 main();

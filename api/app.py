@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from db.clients import GetClientById, AddClient
+from db.clients import GetClientById, AddClient, UpdateClientAmount
 from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId, GetPeerById, AddPeer, RemovePeer
 from db.pay_history import GetClietnHistory
+from db.codes import GetCode, ActivateCode
 from db.exeption import *
 from bot import send_file_to_user
 from wireguard.api import API
@@ -280,6 +281,50 @@ def download():
         input_file = BufferedInputFile(file=file, filename=file_title)
 
         asyncio.run(send_file_to_user(client_id, input_file))
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+        return jsonify(answer)
+
+    answer['data'] = 'ok'
+    return jsonify(answer)
+
+
+@app.route('/api/v1.0/coupon_activate', methods=['POST'])
+def coupon_activate():
+    """активация купона
+
+    Args(POST):
+        client_id (int): id пользователя из телеги
+        coupon (int): купон
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+    if 'client_id' not in request_data or 'coupon' not in request_data or len(request_data['coupon'].strip()) != 7:
+        answer['status'] = False
+        answer['data'] = 'Client id and coupon not presented'
+        return jsonify(answer)
+
+    client_id = int(request_data['client_id'])
+    coupon = str(request_data['coupon'])
+
+    try:
+        code = GetCode().execute(coupon)
+        if code is None:
+            raise InterruptedError('coupon not exist')
+        if code['activated'] is True:
+            raise InterruptedError('coupon already activate')
+
+        ActivateCode().execute(coupon)
+        client = GetClientById().execute(client_id)
+
+        if client is None:
+            raise InterruptedError('client not exist')
+
+        UpdateClientAmount().execute(
+            client_id=client_id,
+            amount=int(code['amount']) + int(client['amount'])
+        )
     except Exception as msg:
         answer['status'] = False
         answer['data'] = str(msg)

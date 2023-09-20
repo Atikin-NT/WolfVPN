@@ -2,7 +2,7 @@ from .init import db
 
 class GetCode:
     "Получить параметры кода по его значению"
-    def execute(self, code: int):
+    def execute(self, code: str):
         """
         Args:
             code (int): сам код
@@ -14,7 +14,7 @@ class GetCode:
     
 class ActivateCode:
     "Активация кода"
-    def execute(self, code: int):
+    def execute(self, code: str):
         """
         Args:
             code (int): сам код
