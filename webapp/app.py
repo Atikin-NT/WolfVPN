@@ -31,7 +31,12 @@ def qrcode(host_id: int):
 @app.route('/coupon', methods=['GET'])
 def coupon():
     return render_template('coupon.html')
- 
+
+
+@app.route('/pay', methods=['GET'])
+def pay():
+    return render_template('pay.html')
+
 
 if __name__ == '__main__':
     app.run()

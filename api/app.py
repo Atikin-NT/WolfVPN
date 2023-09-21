@@ -3,7 +3,7 @@ from flask_cors import CORS
 from db.clients import GetClientById, AddClient, UpdateClientAmount
 from db.hosts import GetAllHosts
 from db.peers import GetPeerByClientId, GetPeerById, AddPeer, RemovePeer
-from db.pay_history import GetClietnHistory
+from db.pay_history import GetClietnHistory, AddBill, UpdateBillStatus
 from db.codes import GetCode, ActivateCode
 from db.exeption import *
 from bot import send_file_to_user
@@ -12,10 +12,12 @@ from aiogram.types.input_file import BufferedInputFile
 import utils
 import asyncio
 import configparser
+import yoomoney
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 dashboard_config = config['dashboard']
+yoomoney_config = config['yoomoney']
 
 all_confs = utils.create_ini_config_list(dict(dashboard_config))
 apis = []
@@ -331,6 +333,44 @@ def coupon_activate():
         return jsonify(answer)
 
     answer['data'] = 'ok'
+    return jsonify(answer)
+
+
+@app.route('/api/v1.0/create_bill', methods=['POST'])
+def create_bill():
+    """создание чека юмани
+
+    Args(POST):
+        client_id (int): id пользователя из телеги
+        amount (int): сумма чека
+    """
+    answer = json_template.copy()
+    request_data = request.get_json()
+    if 'client_id' not in request_data or 'amount' not in request_data or int(request_data['amount']) < 20 or int(request_data['amount']) > 500:
+        answer['status'] = False
+        answer['data'] = 'Client id and amount not presented'
+        return jsonify(answer)
+
+    client_id = int(request_data['client_id'])
+    amount = int(request_data['amount'])
+
+    try:
+        bill_id = AddBill().execute(client_id, amount)
+        quickpay = yoomoney.Quickpay(
+            receiver=yoomoney_config['receiver'],
+            quickpay_form="shop",
+            targets="WolfVPN",
+            paymentType="SB",
+            sum=amount,
+            label=f'{bill_id}_{client_id}_{amount}'
+        )
+
+        answer['data'] = {'bill': quickpay.redirected_url}
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+        return jsonify(answer)
+
     return jsonify(answer)
 
 

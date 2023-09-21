@@ -17,7 +17,7 @@ class AddBill:
         Returns:
             int: id чека в таблице
         """
-        if amount <=0:
+        if amount <= 0:
             raise ValueError("Amount below zero")
         try:
             bill_id = db.add('pay_history', {'client_id': client_id, 'amount': amount}, 'id').fetchone()[0]
