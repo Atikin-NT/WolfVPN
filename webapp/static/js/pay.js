@@ -13,7 +13,10 @@ function isNotEmpty(field){
 
 
 function open_bill(bill_url){
-    window.open(bill_url, '_blank').focus();
+    tg.openLink(bill_url);
+    tg.showAlert('После успешной оплаты ваш счет пополнится автоматически. Если этого не так, то напишите в тех поддержку.', function() {
+        window.location.replace(WEB_APP__URL + '/main');
+    })
 }
 
 
