@@ -109,6 +109,11 @@ function pay_history(){
     window.location.replace(`/bill`);
 }
 
+// тех поддержка
+function help(){
+    tg.openTelegramLink('https://t.me/wolfvpn_help_bot');
+}
+
 // получение информации о пользователе
 async function get_user_info(user_id){
     let res = await Request(SERVER_URL + `/api/v1.0/user/${user_id}`, {
@@ -169,6 +174,7 @@ async function main(){
     let delete_btns = document.getElementsByClassName('action-delete');
     let coupon_btns = document.getElementsByClassName('coupon');
     let pay_btns = document.getElementsByClassName('pay_btn');
+    let help_btns = document.getElementsByClassName('pay_btn');
     let bill_history = document.getElementsByClassName('bill-history');
 
     set_onclock_event(qrcode_btns, qrcode);
@@ -177,6 +183,7 @@ async function main(){
     set_onclock_event(coupon_btns, coupon);
     set_onclock_event(pay_btns, pay);
     set_onclock_event(bill_history, pay_history);
+    set_onclock_event(help_btns, help);
 }
 
 main();
