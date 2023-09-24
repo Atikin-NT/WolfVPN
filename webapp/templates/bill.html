@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;700&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/telegram-web-app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bill.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/start.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bill.css') }}">
     <title>Bill history</title>
@@ -15,17 +15,9 @@
 <body>
     <div class="container">
         <h4>История операций</h4>
-        <ul>
-            <li>
-                <p>Сумма: <span>100 ₽</span></p>
-                <p>Дата: <span>27.08.2023</span></p>
-                <p>Статус: <span>ожидает подтверждения</span></p>
-            </li>
-            <li>
-                <p>Сумма: <span>200 ₽</span></p>
-                <p>Дата: <span>10.07.2023</span></p>
-                <p>Статус: <span>Выполнено</span></p>
-            </li>
+        <ul id="pay-ul">
         </ul>
+    </div>
+    <script src="{{ url_for('static', filename='js/bill.js') }}"></script>
 </body>
 </html>

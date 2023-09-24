@@ -104,9 +104,9 @@ function pay(){
     window.location.replace(`/pay`);
 }
 
-let bill_history = document.getElementById('bill-history');
-bill_history.onclick = function(){
-    window.location.replace("http://127.0.0.1:5000/bill");
+// история пополнения счета
+function pay_history(){
+    window.location.replace(`/bill`);
 }
 
 // получение информации о пользователе
@@ -169,12 +169,14 @@ async function main(){
     let delete_btns = document.getElementsByClassName('action-delete');
     let coupon_btns = document.getElementsByClassName('coupon');
     let pay_btns = document.getElementsByClassName('pay_btn');
+    let bill_history = document.getElementsByClassName('bill-history');
 
     set_onclock_event(qrcode_btns, qrcode);
     set_onclock_event(download_btns, download);
     set_onclock_event(delete_btns, delete_fun);
     set_onclock_event(coupon_btns, coupon);
     set_onclock_event(pay_btns, pay);
+    set_onclock_event(bill_history, pay_history);
 }
 
 main();

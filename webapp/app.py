@@ -18,8 +18,8 @@ def add_peer():
     return render_template('add_peer.html')
 
 
-@app.route('/bill/<int:host_id>', methods=['GET'])
-def bill(host_id: int):
+@app.route('/bill', methods=['GET'])
+def bill():
     return render_template('bill.html')
 
 

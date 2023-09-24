@@ -201,17 +201,32 @@ def remove_peer():
     return jsonify(answer)
 
 
-@app.route('/api/v1.0/bill_history/<int:client_id>', methods=['POST'])
-def bill_history(client_id: int):
+@app.route('/api/v1.0/bill_history', methods=['POST'])
+def bill_history():
     """получение чековой истории пользователя
 
     Args:
         client_id (int): id пользователя из телеги
     """
-    bill_history = GetClietnHistory().execute(client_id)
     answer = json_template.copy()
+    request_data = request.get_json()
+    if 'client_id' not in request_data:
+        answer['status'] = False
+        answer['data'] = 'Client id and host id not presented'
+        return jsonify(answer)
 
-    answer['data'] = {'bills': bill_history}
+    client_id = int(request_data['client_id'])
+
+    try:
+        bill_history = GetClietnHistory().execute(client_id)
+        for bill in bill_history:
+            bill['create_date'] = bill['create_date'].strftime('%m.%d.%Y')
+        bill_history.reverse()
+        answer['data'] = {'bills': bill_history}
+    except Exception as msg:
+        answer['status'] = False
+        answer['data'] = str(msg)
+
     return jsonify(answer)
 
 
