@@ -1,4 +1,14 @@
+from wireguard.api import API
+import configparser
 
+config = configparser.ConfigParser()
+config.read('./config.ini')
+dashboard_config = config['dashboard']
+
+json_template = {
+    'status': True,
+    'data': ''
+}
 
 def get_permited_keys_from_dict_list(d: list, keys: list) -> list:
     r = [{key: i[key]
@@ -29,3 +39,13 @@ def create_ini_config_list(d: dict):
         })
 
     return confs
+
+all_confs = create_ini_config_list(dict(dashboard_config))
+apis = []
+for conf in all_confs:
+    apis.append(API(
+        conf['password'],
+        conf['login'],
+        conf['login_url'],
+        conf['base_url']
+    ))
