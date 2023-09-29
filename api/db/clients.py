@@ -50,3 +50,15 @@ class GetClientById:
             _type_: результат в виде словаря или None, если такого не существует
         """
         return db.select('clients', {'id': client_id}).fetchone()
+
+
+class GetAllClients:
+    "Получить список всех клиентов"
+    def execute(self):
+        """
+        Returns:
+            list: список всех пользователей
+        """
+        clients = db.select('clients').fetchall()
+        res = [dict(client) for client in clients]
+        return res

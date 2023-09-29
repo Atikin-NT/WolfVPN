@@ -5,6 +5,8 @@ from routes.client import client_api
 from routes.peer import peer_api
 from routes.pay import pay_api
 from routes.actions import action_api
+import debit
+import multiprocessing as mp
 
 app = Flask(__name__)
 
@@ -25,4 +27,6 @@ def check():
 
 
 if __name__ == '__main__':
+    p = mp.Process(target=debit.auto_daily_debit, daemon=True)
+    p.start()
     app.run(port=5001)
