@@ -4,20 +4,21 @@ from db.clients import GetAllClients, UpdateClientAmount
 from db.peers import GetPeerByClientId, RemovePeer
 import utils
 import configparser
+from wireguard.api import API
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 DAY_PAY = int(config['economic']['day_pay'])
 
 
-def remove_peer(client_id: int, host_id: int, pubkey: str):
-    res = utils.apis[host_id-1].remove_peer('wg0', [pubkey])
+def remove_peer(api: API, client_id: int, host_id: int, pubkey: str):
+    res = api.remove_peer('wg0', [pubkey])
     if res is False:
         raise InterruptedError("Can't remove")
     RemovePeer().execute(client_id, host_id)
 
 
-def debit():
+def debit(api_list):
     user_list = GetAllClients().execute()
     for user in user_list:
         client_id = user['id']
@@ -30,11 +31,12 @@ def debit():
 
         for i in range(peer_count):
             peer = peers[i]
+            host_id = int(peer['host_id'])
             if DAY_PAY > amount:
                 try:
-                    remove_peer(client_id, int(peer['host_id']), peer['params']['public_key'])
+                    remove_peer(api_list[host_id-1], client_id, host_id, peer['params']['public_key'])
                 except Exception as msg:
-                    pass
+                    print('error')
             amount -= DAY_PAY
 
         amount = 0 if amount < 0 else amount
