@@ -48,7 +48,7 @@ class UpdateBillStatus:
 class GetClietnHistory:
     "Получение истории операций пользователя"
     def execute(self, client_id: int):
-        """_summary_
+        """
 
         Args:
             client_id (int): id клиента
@@ -62,3 +62,16 @@ class GetClietnHistory:
             ).fetchall()
         res = [dict(bill) for bill in bills]
         return res
+    
+class GetBillById:
+    "Получение конкретного чека по id"
+    def execute(self, bill_id: int):
+        """
+
+        Args:
+            bill_id (int): id чека
+
+        Returns:
+            _type_: результат в виде словаря или None, если такого не существует
+        """
+        return db.select('pay_history', {'id': bill_id}).fetchone()

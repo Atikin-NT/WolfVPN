@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from db.pay_history import GetClietnHistory, AddBill, UpdateBillStatus
+from db.pay_history import GetClietnHistory, AddBill, UpdateBillStatus, GetBillById
 from db.clients import GetClientById, UpdateClientAmount
 from db.codes import GetCode, ActivateCode
 import yoomoney
@@ -93,3 +93,31 @@ def coupon_activate():
 
     answer['data'] = 'ok'
     return jsonify(answer)
+
+
+@pay_api.route('/api/v1.0/yoomoney_callback', methods=['POST'])
+def get_pay():
+    """обработчик callback с yoomoney
+    Обновляет баланс пользователя взависимости от параметров с юмани
+    """
+    withdraw_amount = int(request.form.get("withdraw_amount").split('.')[0])
+    label = request.form.get("label")
+    bill_id, client_id, amount = label.split('_')
+    bill_id = int(bill_id)
+    client_id = int(client_id)
+    amount = int(amount)
+
+    try:
+        bill = GetBillById().execute(bill_id)
+        assert int(bill['amount']) == amount
+        
+        UpdateBillStatus().execute(bill_id, 2)
+
+        client = GetClientById().execute(client_id)
+
+        new_amount = int(client['amount']) + amount
+        UpdateClientAmount().execute(client_id, new_amount)
+    except Exception as ex:
+        return '', 404
+
+    return '', 200
