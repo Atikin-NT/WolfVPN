@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import utils
+import flask_monitoringdashboard as dashboard
 from routes.client import client_api
 from routes.peer import peer_api
 from routes.pay import pay_api
@@ -9,6 +10,7 @@ import debit
 import multiprocessing as mp
 
 app = Flask(__name__)
+
 
 app.register_blueprint(client_api)
 app.register_blueprint(peer_api)
@@ -24,6 +26,9 @@ json_template = utils.json_template
 def check():
     "Проверка связи"
     return jsonify(json_template)
+
+
+dashboard.bind(app)
 
 
 if __name__ == '__main__':
