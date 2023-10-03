@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from db.pay_history import GetClietnHistory, AddBill, UpdateBillStatus, GetBillById
 from db.clients import GetClientById, UpdateClientAmount
 from db.codes import GetCode, ActivateCode
+import db.exeption as ex
 import yoomoney
 import utils
 import configparser
@@ -43,10 +44,9 @@ def create_bill():
         )
 
         answer['data'] = {'bill': quickpay.redirected_url}
-    except Exception as msg:
+    except (ex.ClientNotExist, ValueError) as e:
         answer['status'] = False
-        answer['data'] = str(msg)
-        return jsonify(answer)
+        answer['data'] = e
 
     return jsonify(answer)
 
@@ -68,6 +68,7 @@ def coupon_activate():
 
     client_id = int(request_data['client_id'])
     coupon = str(request_data['coupon'])
+    answer['data'] = 'ok'
 
     try:
         code = GetCode().execute(coupon)
@@ -86,12 +87,10 @@ def coupon_activate():
             client_id=client_id,
             amount=int(code['amount']) + int(client['amount'])
         )
-    except Exception as msg:
+    except ValueError as e:
         answer['status'] = False
-        answer['data'] = str(msg)
-        return jsonify(answer)
-
-    answer['data'] = 'ok'
+        answer['data'] = e
+    
     return jsonify(answer)
 
 
@@ -107,17 +106,14 @@ def get_pay():
     client_id = int(client_id)
     amount = int(amount)
 
-    try:
-        bill = GetBillById().execute(bill_id)
-        assert int(bill['amount']) == amount
-        
-        UpdateBillStatus().execute(bill_id, 2)
+    bill = GetBillById().execute(bill_id)
+    assert int(bill['amount']) == amount
+    
+    UpdateBillStatus().execute(bill_id, 2)
 
-        client = GetClientById().execute(client_id)
+    client = GetClientById().execute(client_id)
 
-        new_amount = int(client['amount']) + amount
-        UpdateClientAmount().execute(client_id, new_amount)
-    except Exception as ex:
-        return '', 404
+    new_amount = int(client['amount']) + amount
+    UpdateClientAmount().execute(client_id, new_amount)
 
     return '', 200

@@ -38,15 +38,11 @@ def bill_history():
 
     client_id = int(request_data['client_id'])
 
-    try:
-        bill_history = GetClietnHistory().execute(client_id)
-        for bill in bill_history:
-            bill['create_date'] = bill['create_date'].strftime('%m.%d.%Y')
-        bill_history.reverse()
-        answer['data'] = {'bills': bill_history}
-    except Exception as msg:
-        answer['status'] = False
-        answer['data'] = str(msg)
+    bill_history = GetClietnHistory().execute(client_id)
+    for bill in bill_history:
+        bill['create_date'] = bill['create_date'].strftime('%m.%d.%Y')
+    bill_history.reverse()
+    answer['data'] = {'bills': bill_history}
 
     return jsonify(answer)
 
@@ -69,18 +65,12 @@ def qrcode():
     client_id = int(request_data['client_id'])
     host_id = int(request_data['host_id'])
 
-    try:
-        peer = GetPeerById().execute(client_id, host_id)
-        if peer is None:
-            answer['status'] = False
-            answer['data'] = 'Peer not found'
-            return jsonify(answer)
+    peer = GetPeerById().execute(client_id, host_id)
+    if peer is None:
+        raise InterruptedError("peer not exist")
 
-        qrcode_str = utils.apis[host_id-1].qrcode('wg0', peer['params']['public_key'])
-        answer['data'] = {'qrcode': qrcode_str}
-    except Exception as msg:
-        answer['status'] = False
-        answer['data'] = str(msg)
+    qrcode_str = utils.apis[host_id-1].qrcode('wg0', peer['params']['public_key'])
+    answer['data'] = {'qrcode': qrcode_str}
 
     return jsonify(answer)
 
@@ -105,24 +95,16 @@ def download():
 
     peer = GetPeerById().execute(client_id, host_id)
     if peer is None:
-        answer['status'] = False
-        answer['data'] = 'Peer not found'
-        return jsonify(answer)
+        raise InterruptedError("peer not exist")
 
-    try:
-        file = utils.apis[host_id-1].download('wg0', peer['params']['public_key'])
-        if file is False:
-            raise InterruptedError('can`t get file')
-        print(file)
-        file_content, file_title = file['content'], file['filename']
-        file = bytes(file_content, 'utf-8')
-        input_file = BufferedInputFile(file=file, filename=file_title)
+    file = utils.apis[host_id-1].download('wg0', peer['params']['public_key'])
+    if file is False:
+        raise InterruptedError('can`t get file')
+    file_content, file_title = file['content'], file['filename']
+    file = bytes(file_content, 'utf-8')
+    input_file = BufferedInputFile(file=file, filename=file_title)
 
-        asyncio.run(send_file_to_user(client_id, input_file))
-    except Exception as msg:
-        answer['status'] = False
-        answer['data'] = str(msg)
-        return jsonify(answer)
+    asyncio.run(send_file_to_user(client_id, input_file))
 
     answer['data'] = 'ok'
     return jsonify(answer)

@@ -51,11 +51,9 @@ def add_user():
 
     try:
         AddClient().execute(client_id, name)
-    except ValueError:
+    except (ValueError, ex.ClientAlreadyExist) as e:
         answer['status'] = False
-        answer['data'] = 'name is empty'
-    except ex.ClientAlreadyExist:
-        pass
+        answer['data'] = e
 
     return jsonify(answer)
 

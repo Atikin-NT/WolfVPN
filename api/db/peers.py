@@ -27,9 +27,9 @@ class AddPeer:
                 'params': json.dumps(params)
             })
         except ForeignKeyViolation:
-            raise HostOrUserNotExist()
+            raise HostOrUserNotExist('host or user not exist')
         except UniqueViolation:
-            raise PeerAlreadyExist()
+            raise PeerAlreadyExist('Peer already exist')
 
 class RemovePeer:
     "Удаление соединения"

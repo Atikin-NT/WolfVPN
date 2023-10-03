@@ -22,7 +22,7 @@ class AddBill:
         try:
             bill_id = db.add('pay_history', {'client_id': client_id, 'amount': amount}, 'id').fetchone()[0]
         except ForeignKeyViolation:
-            raise ClientNotExist()
+            raise ClientNotExist('Clinet not exist')
         return int(bill_id)
 
 class UpdateBillStatus:

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from db.peers import GetPeerById, AddPeer, RemovePeer
+import db.exeption as ex
 import utils
 
 peer_api = Blueprint('peer_api', __name__)
@@ -22,15 +23,15 @@ def add_peer():
         return jsonify(answer)
     client_id = request_data['client_id']
     host_id = int(request_data['host_id'])
+    answer['data'] = 'ok'
 
     try:
         data, params = utils.apis[host_id-1].add_peer('wg0', request_data)
         AddPeer().execute(client_id, host_id, params)
-    except Exception as msg:
+    except (ex.HostOrUserNotExist, ex.PeerAlreadyExist) as e:
         answer['status'] = False
-        answer['data'] = str(msg)
-        return jsonify(answer)
-    answer['data'] = 'ok'
+        answer['data'] = e
+    
     return jsonify(answer)
 
 
@@ -51,17 +52,13 @@ def remove_peer():
     client_id = request_data['client_id']
     host_id = int(request_data['host_id'])
 
-    try:
-        peer = GetPeerById().execute(client_id, host_id)
-        if peer is None:
-            raise InterruptedError("peer not exist")
-        res = utils.apis[host_id-1].remove_peer('wg0', [peer['params']['public_key']])
-        if res is False:
-            raise InterruptedError("Can't remove")
-        RemovePeer().execute(client_id, host_id)
-    except Exception as msg:
-        answer['status'] = False
-        answer['data'] = str(msg)
-        return jsonify(answer)
+    peer = GetPeerById().execute(client_id, host_id)
+    if peer is None:
+        raise InterruptedError("peer not exist")
+    res = utils.apis[host_id-1].remove_peer('wg0', [peer['params']['public_key']])
+    if res is False:
+        raise InterruptedError("Can't remove")
+    RemovePeer().execute(client_id, host_id)
+    
     answer['data'] = 'ok'
     return jsonify(answer)

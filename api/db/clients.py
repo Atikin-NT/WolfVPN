@@ -18,7 +18,7 @@ class AddClient:
         try:
             db.add('clients', {'id': client_id, 'name': name})
         except UniqueViolation:
-            raise ClientAlreadyExist()
+            raise ClientAlreadyExist('Client already exist')
 
 class UpdateClientAmount:
     "Обновить балан клиента"

@@ -1,17 +1,11 @@
-import multiprocessing as mp
-import time
-
-def auto_daily_debit():
-    while True:
-        print('debit')
-        time.sleep(1)
+from api.db.exeption import *
 
 def main():
-    time.sleep(5)
-    raise ValueError()
+    try:
+        raise PeerAlreadyExist('bla bla')
+    except PeerAlreadyExist as e:
+        print(e)
 
 
 if __name__ == '__main__':
-    p = mp.Process(target=auto_daily_debit, daemon=True)
-    p.start()
     main()
