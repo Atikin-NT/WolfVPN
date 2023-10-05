@@ -44,7 +44,7 @@ def debit(api_list):
 
 
 def auto_daily_debit():
-    schedule.every().seconds.do(debit)
+    schedule.every().seconds.do(debit, api_list=utils.apis)
     while True:
         schedule.run_pending()
         time.sleep(1)

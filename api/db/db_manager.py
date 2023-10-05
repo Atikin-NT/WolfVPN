@@ -4,7 +4,7 @@ import psycopg2.extras
 class DataBaseManager():
 
     def __init__(self, dbname: str, user: str, password=None):
-        self.conn = psycopg2.connect(f'dbname={dbname} user={user} password={password}')
+        self.conn = psycopg2.connect(f'dbname={dbname} user={user} password={password} host=localhost')
 
     def __del__(self):
         self.conn.close()
