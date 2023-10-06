@@ -11,6 +11,7 @@ from db.init import CreateTable
 import debit
 import multiprocessing as mp
 import configparser
+import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -39,10 +40,16 @@ dashboard.bind(app)
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename="app.log",
+                        level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(message)s",
+                        filemode="w")
+    logging.info('Start wolf vpn')
+    
     p = mp.Process(target=debit.auto_daily_debit, daemon=True)
     p.start()
 
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
     CreateTable().execute()
-    
+
     app.run(port=5001)

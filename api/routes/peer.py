@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from db.peers import GetPeerById, AddPeer, RemovePeer
 import db.exeption as ex
 import utils
+import logging
 
 peer_api = Blueprint('peer_api', __name__)
 
@@ -15,9 +16,11 @@ def add_peer():
         host_id (int): id хоста
         username (str): ник пользователя
     """
+    logging.info('add_peer')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'username' not in request_data or 'client_id' not in request_data or 'host_id' not in request_data:
+        logging.error(f'invalid params in add_peer: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Not all values was presented'
         return jsonify(answer)
@@ -29,6 +32,7 @@ def add_peer():
         data, params = utils.apis[host_id-1].add_peer('wg0', request_data)
         AddPeer().execute(client_id, host_id, params)
     except (ex.HostOrUserNotExist, ex.PeerAlreadyExist) as e:
+        logging.error(f'Add peer: clinet_id = {client_id}, host_id = {host_id}, params = {params}')
         answer['status'] = False
         answer['data'] = e
     
@@ -43,9 +47,11 @@ def remove_peer():
         client_id (int): id пользователя из телеги
         host_id (int): id хоста
     """
+    logging.info('add_peer')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'host_id' not in request_data:
+        logging.error(f'invalid params in remove_peer: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Not all values was presented'
         return jsonify(answer)
@@ -54,9 +60,11 @@ def remove_peer():
 
     peer = GetPeerById().execute(client_id, host_id)
     if peer is None:
+        logging.error(f'peer not exist: clinet_id = {client_id}, host_id = {host_id}')
         raise InterruptedError("peer not exist")
     res = utils.apis[host_id-1].remove_peer('wg0', [peer['params']['public_key']])
     if res is False:
+        logging.error(f"cant delete from host: clinet_id = {client_id}, host_id = {host_id}, peer = {peer['params']['public_key']}")
         raise InterruptedError("Can't remove")
     RemovePeer().execute(client_id, host_id)
     

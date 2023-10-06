@@ -174,7 +174,7 @@ async function main(){
     let delete_btns = document.getElementsByClassName('action-delete');
     let coupon_btns = document.getElementsByClassName('coupon');
     let pay_btns = document.getElementsByClassName('pay_btn');
-    let help_btns = document.getElementsByClassName('pay_btn');
+    let help_btns = document.getElementsByClassName('help_btn');
     let bill_history = document.getElementsByClassName('bill-history');
 
     set_onclock_event(qrcode_btns, qrcode);

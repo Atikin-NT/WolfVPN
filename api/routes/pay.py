@@ -1,11 +1,12 @@
 from flask import Blueprint, jsonify, request
-from db.pay_history import GetClietnHistory, AddBill, UpdateBillStatus, GetBillById
+from db.pay_history import AddBill, UpdateBillStatus, GetBillById
 from db.clients import GetClientById, UpdateClientAmount
 from db.codes import GetCode, ActivateCode
 import db.exeption as ex
 import yoomoney
 import utils
 import configparser
+import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -22,9 +23,11 @@ def create_bill():
         client_id (int): id пользователя из телеги
         amount (int): сумма чека
     """
+    logging.info('create_bill')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'amount' not in request_data or int(request_data['amount']) < 20 or int(request_data['amount']) > 500:
+        logging.error(f'invalid params in create_bill: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and amount not presented'
         return jsonify(answer)
@@ -45,6 +48,7 @@ def create_bill():
 
         answer['data'] = {'bill': quickpay.redirected_url}
     except (ex.ClientNotExist, ValueError) as e:
+        logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
         answer['data'] = e
 
@@ -59,9 +63,11 @@ def coupon_activate():
         client_id (int): id пользователя из телеги
         coupon (int): купон
     """
+    logging.info('coupon_activate')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'coupon' not in request_data or len(request_data['coupon'].strip()) != 7:
+        logging.error(f'invalid params in coupon_activate: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and coupon not presented'
         return jsonify(answer)
@@ -88,6 +94,7 @@ def coupon_activate():
             amount=int(code['amount']) + int(client['amount'])
         )
     except ValueError as e:
+        logging.error(f'activate code and update amount: client_id = {client_id}, coupon = {coupon}, ex = {e}')
         answer['status'] = False
         answer['data'] = e
     
@@ -105,6 +112,8 @@ def get_pay():
     bill_id = int(bill_id)
     client_id = int(client_id)
     amount = int(amount)
+
+    logging.info(f'get_pay: label = {label}, withdraw_amount = {withdraw_amount}')
 
     bill = GetBillById().execute(bill_id)
     assert int(bill['amount']) == amount

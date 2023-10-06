@@ -6,6 +6,7 @@ from aiogram.types.input_file import BufferedInputFile
 import asyncio
 from bot import send_file_to_user
 import utils
+import logging
 
 action_api = Blueprint('action_api', __name__)
 
@@ -29,9 +30,11 @@ def bill_history():
     Args:
         client_id (int): id пользователя из телеги
     """
+    logging.info('get bill history')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data:
+        logging.error(f'invalid params in bill_history: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and host id not presented'
         return jsonify(answer)
@@ -55,9 +58,11 @@ def qrcode():
         client_id (int): id пользователя из телеги
         host_id (int): id сервера из БД
     """
+    logging.info('get qrcode')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'host_id' not in request_data:
+        logging.error(f'invalid params in qrcode: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and host id not presented'
         return jsonify(answer)
@@ -67,6 +72,7 @@ def qrcode():
 
     peer = GetPeerById().execute(client_id, host_id)
     if peer is None:
+        logging.error(f'peer not found: client_id = {client_id}, host_id = {host_id}')
         raise InterruptedError("peer not exist")
 
     qrcode_str = utils.apis[host_id-1].qrcode('wg0', peer['params']['public_key'])
@@ -83,9 +89,11 @@ def download():
         client_id (int): id пользователя из телеги
         host_id (int): id сервера из БД
     """
+    logging.info('get download')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'host_id' not in request_data:
+        logging.error(f'invalid params in qrcode: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and host id not presented'
         return jsonify(answer)
@@ -95,10 +103,12 @@ def download():
 
     peer = GetPeerById().execute(client_id, host_id)
     if peer is None:
+        logging.error(f'peer not found: client_id = {client_id}, host_id = {host_id}')
         raise InterruptedError("peer not exist")
 
     file = utils.apis[host_id-1].download('wg0', peer['params']['public_key'])
     if file is False:
+        logging.error(f"file for peer not found: host_id = {host_id-1}, peer = {peer['params']['public_key']}")
         raise InterruptedError('can`t get file')
     file_content, file_title = file['content'], file['filename']
     file = bytes(file_content, 'utf-8')

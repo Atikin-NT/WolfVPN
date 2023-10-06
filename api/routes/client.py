@@ -1,10 +1,11 @@
 from flask import Blueprint, jsonify, request
-from db.clients import GetClientById, AddClient, UpdateClientAmount
+from db.clients import GetClientById, AddClient
 from db.peers import GetPeerByClientId
 from db.hosts import GetAllHosts
 import db.exeption as ex
 import utils
 import configparser
+import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -20,6 +21,7 @@ def user_login_check(user_id: int):
     Args:
         user_id (int): id пользователя из телеги
     """
+    logging.info(f'user_login_check, user_id = {user_id}')
     client = GetClientById().execute(user_id)
     answer = utils.json_template.copy()
 
@@ -38,10 +40,12 @@ def add_user():
         client_id (int): id пользователя из телеги
         name (str): имя пользователя
     """
+    logging.info('add_user')
     answer = utils.json_template.copy()
     request_data = request.get_json()
 
     if 'client_id' not in request_data or 'name' not in request_data:
+        logging.error(f'invalid params in add_user: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and name not presented'
         return jsonify(answer)
@@ -52,6 +56,7 @@ def add_user():
     try:
         AddClient().execute(client_id, name)
     except (ValueError, ex.ClientAlreadyExist) as e:
+        logging.error(f'add client: client_id = {client_id}, ex = {e}, name = {name}')
         answer['status'] = False
         answer['data'] = e
 
@@ -64,10 +69,12 @@ def get_client(client_id: int):
     Args:
         client_id (int): id пользователя из телеги
     """
+    logging.info('get_client')
     answer = utils.json_template.copy()
 
     client = GetClientById().execute(client_id)
     if client is None:
+        logging.error(f'Client not found: client_id = {client_id}')
         answer['status'] = False
         answer['data'] = 'User not found'
         return jsonify(answer)

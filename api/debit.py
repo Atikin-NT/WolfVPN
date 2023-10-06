@@ -5,6 +5,7 @@ from db.peers import GetPeerByClientId, RemovePeer
 from db.db_manager import Connection, DataBaseManager
 import utils
 import configparser
+import logging
 from wireguard.api import API
 
 config = configparser.ConfigParser()
@@ -14,6 +15,7 @@ db_config = config['database']
 
 
 def remove_peer(api: API, client_id: int, host_id: int, pubkey: str):
+    logging.info(f'delete peer: client_id = {client_id}, host_id = {host_id}')
     res = api.remove_peer('wg0', [pubkey])
     if res is False:
         raise InterruptedError("Can't remove")
@@ -37,8 +39,8 @@ def debit(api_list):
             if DAY_PAY > amount:
                 try:
                     remove_peer(api_list[host_id-1], client_id, host_id, peer['params']['public_key'])
-                except Exception as msg:
-                    print('error')
+                except Exception as e:
+                    logging.error(f'Error in debit function. Ex = {e}')
             amount -= DAY_PAY
 
         amount = 0 if amount < 0 else amount
