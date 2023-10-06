@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from db.peers import GetPeerById, AddPeer, RemovePeer
+from db.clients import GetClientById
 import db.exeption as ex
 import utils
 import logging
@@ -29,6 +30,14 @@ def add_peer():
     answer['data'] = 'ok'
 
     try:
+        client = GetClientById().execute(client_id)
+
+        if client is None:
+            raise InterruptedError('client not exist')
+        
+        if int(client['amount']) <= 0:
+            raise InterruptedError('not money')
+        
         data, params = utils.apis[host_id-1].add_peer('wg0', request_data)
         AddPeer().execute(client_id, host_id, params)
     except (ex.HostOrUserNotExist, ex.PeerAlreadyExist) as e:
