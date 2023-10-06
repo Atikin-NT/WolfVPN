@@ -2,9 +2,17 @@ from db.clients import AddClient, UpdateClientAmount, GetClientById
 from db.pay_history import AddBill, UpdateBillStatus, GetClietnHistory
 from db.hosts import GetHostById, GetAllHosts
 from db.codes import GetCode, ActivateCode
+from db.db_manager import DataBaseManager, Connection
 from db.peers import AddPeer, RemovePeer, GetPeerByClientId, GetPeerById
 from db.exeption import ClientAlreadyExist, ClientNotExist, HostOrUserNotExist, PeerAlreadyExist
 import pytest
+import configparser
+
+config = configparser.ConfigParser()
+config.read('./config.ini')
+bot_config = config['database']
+
+Connection.db = DataBaseManager(bot_config['dbname'], bot_config['user'], bot_config['password'])
 
 # AddClietn -----------------
 def test_empty_name():
@@ -71,7 +79,7 @@ def test_update_bill_ok():
     UpdateBillStatus().execute(bill_id=bill_id, status=1)
     bills = GetClietnHistory().execute(client_id=123)
     for bill in bills:
-        if bill[0] == bill_id:
+        if bill['id'] == bill_id:
             assert bill['status'] == 1
 
 # GetClietnHistory ----------
@@ -99,20 +107,20 @@ def test_get_all_hosts():
 
 # GetCode -------------------
 def test_get_not_exist_code():
-    code = GetCode().execute(code=2)
+    code = GetCode().execute(code='testcode1')
     assert code is None
 
 def test_get_exist_code():
-    code = GetCode().execute(code=1)
-    assert code['code'] == 1
+    code = GetCode().execute(code='testcode')
+    assert code['code'] == 'testcode'
 
 # ActivateCode --------------
 def test_activete_not_exist_code():
-    ActivateCode().execute(code=2)
+    ActivateCode().execute(code='testcode1')
 
 def test_activate_code():
-    ActivateCode().execute(code=1)
-    code = GetCode().execute(code=1)
+    ActivateCode().execute(code='testcode')
+    code = GetCode().execute(code='testcode')
     assert code['activated'] is True
 
 

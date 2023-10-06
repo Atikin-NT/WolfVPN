@@ -1,4 +1,4 @@
-from .init import db
+from .db_manager import Connection
 from psycopg2.errors import UniqueViolation
 from .exeption import ClientAlreadyExist
 
@@ -16,7 +16,7 @@ class AddClient:
         if name.strip() == '':
             raise ValueError('Empty name')
         try:
-            db.add('clients', {'id': client_id, 'name': name})
+            Connection.db.add('clients', {'id': client_id, 'name': name})
         except UniqueViolation:
             raise ClientAlreadyExist('Client already exist')
 
@@ -33,7 +33,7 @@ class UpdateClientAmount:
         """
         if amount < 0:
             raise ValueError('Amount can not be below zero')
-        db.update(
+        Connection.db.update(
             'clients', 
             {'amount': amount},
             {'id': client_id}
@@ -49,7 +49,7 @@ class GetClientById:
         Returns:
             _type_: результат в виде словаря или None, если такого не существует
         """
-        return db.select('clients', {'id': client_id}).fetchone()
+        return Connection.db.select('clients', {'id': client_id}).fetchone()
 
 
 class GetAllClients:
@@ -59,6 +59,6 @@ class GetAllClients:
         Returns:
             list: список всех пользователей
         """
-        clients = db.select('clients').fetchall()
+        clients = Connection.db.select('clients').fetchall()
         res = [dict(client) for client in clients]
         return res

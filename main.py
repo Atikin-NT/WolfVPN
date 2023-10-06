@@ -1,10 +1,21 @@
-from api.db.exeption import *
+class A:
+    pass
+
+class B(A):
+    pass
+
+class C(A):
+    def print_p(self):
+        print(A.p)
 
 def main():
-    try:
-        raise PeerAlreadyExist('bla bla')
-    except PeerAlreadyExist as e:
-        print(e)
+    b = B()
+    A.p = 5
+    c = C()
+    print(b.p, c.p)
+    print(id(b.p), id(c.p))
+    print(id(b), id(c))
+    c.print_p()
 
 
 if __name__ == '__main__':

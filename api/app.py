@@ -6,8 +6,15 @@ from routes.client import client_api
 from routes.peer import peer_api
 from routes.pay import pay_api
 from routes.actions import action_api
+from db.db_manager import Connection, DataBaseManager
+from db.init import CreateTable
 import debit
 import multiprocessing as mp
+import configparser
+
+config = configparser.ConfigParser()
+config.read('./config.ini')
+db_config = config['database']
 
 app = Flask(__name__)
 
@@ -34,4 +41,8 @@ dashboard.bind(app)
 if __name__ == '__main__':
     p = mp.Process(target=debit.auto_daily_debit, daemon=True)
     p.start()
+
+    Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
+    CreateTable().execute()
+    
     app.run(port=5001)

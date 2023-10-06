@@ -1,6 +1,9 @@
 import psycopg2
 import psycopg2.extras
 
+class Connection:
+    pass
+
 class DataBaseManager():
 
     def __init__(self, dbname: str, user: str, password=None):

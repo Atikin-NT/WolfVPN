@@ -1,22 +1,22 @@
-from .init import db
+from .db_manager import Connection
 
-class GetCode:
+class GetCode(Connection):
     "Получить параметры кода по его значению"
     def execute(self, code: str):
         """
         Args:
-            code (int): сам код
+            code (str): сам код
 
         Returns:
             _type_: None если код не найден, иначе - список из его параметров
         """
-        return db.select('codes', {'code': code}).fetchone()
+        return Connection.db.select('codes', {'code': code}).fetchone()
     
-class ActivateCode:
+class ActivateCode(Connection):
     "Активация кода"
     def execute(self, code: str):
         """
         Args:
             code (int): сам код
         """
-        db.update('codes', {'activated': True}, {'code': code})
+        Connection.db.update('codes', {'activated': True}, {'code': code})

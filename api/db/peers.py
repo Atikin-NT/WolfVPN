@@ -1,9 +1,9 @@
-from .init import db
+from .db_manager import Connection
 from .exeption import HostOrUserNotExist, PeerAlreadyExist
 from psycopg2.errors import ForeignKeyViolation, UniqueViolation
 import json
 
-class AddPeer:
+class AddPeer(Connection):
     "Добавление нового соединения"
     def execute(self, client_id: int, host_id: int, params: dict) -> None:
         """
@@ -21,7 +21,7 @@ class AddPeer:
             raise ValueError('Params is not Valid')
         
         try:
-            db.add('peers', {
+            Connection.db.add('peers', {
                 'client_id': client_id,
                 'host_id': host_id,
                 'params': json.dumps(params)
@@ -31,7 +31,7 @@ class AddPeer:
         except UniqueViolation:
             raise PeerAlreadyExist('Peer already exist')
 
-class RemovePeer:
+class RemovePeer(Connection):
     "Удаление соединения"
     def execute(self, client_id: int, host_id: int) -> None:
         """
@@ -39,9 +39,9 @@ class RemovePeer:
             client_id (int): id клиента
             host_id (int): id хоста_
         """
-        db.delete('peers', {'client_id': client_id, 'host_id': host_id})
+        Connection.db.delete('peers', {'client_id': client_id, 'host_id': host_id})
 
-class GetPeerByClientId:
+class GetPeerByClientId(Connection):
     "Получить все соединения у конкретного клиента"
     def execute(self, client_id: int) -> list:
         """
@@ -51,11 +51,11 @@ class GetPeerByClientId:
         Returns:
             list: список всех соединений
         """
-        peers = db.select('peers', {'client_id': client_id}).fetchall()
+        peers = Connection.db.select('peers', {'client_id': client_id}).fetchall()
         res = [dict(peer) for peer in peers]
         return res
 
-class GetPeerById:
+class GetPeerById(Connection):
     "Получение одного соединения по (client_id, host_id)"
     def execute(self, client_id: int, host_id: int) -> list:
         """
@@ -66,4 +66,4 @@ class GetPeerById:
         Returns:
             list: список, состоящий из параметросоединения
         """
-        return db.select('peers', {'client_id': client_id, 'host_id': host_id}).fetchone()
+        return Connection.db.select('peers', {'client_id': client_id, 'host_id': host_id}).fetchone()
