@@ -58,7 +58,7 @@ def add_user():
     except (ValueError, ex.ClientAlreadyExist) as e:
         logging.error(f'add client: client_id = {client_id}, ex = {e}, name = {name}')
         answer['status'] = False
-        answer['data'] = e
+        answer['data'] = str(e)
 
     return jsonify(answer)
 

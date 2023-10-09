@@ -12,3 +12,6 @@ class PeerAlreadyExist(Exception):
 
 class HostOrUserNotExist(Exception):
     "пользователь или хост не существует"
+
+class NotEnoughMoney(Exception):
+    "Недостаточно средств на счету пользователя"

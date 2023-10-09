@@ -90,7 +90,11 @@ async function add_peer(user_id, host_id, username, first_name, tg) {
     });
 
     if (!res['status']) {
-        tg.showAlert('Ошибка сервера, напишите в тех поддержку');
+        if (res['data'] == 'not money') {
+            tg.showAlert('У вас недостаточно средств :(');
+        } else {
+            g.showAlert('Ошибка сервера, напишите в тех поддержку');
+        }
     } else {
         tg.showAlert('Все успешно!');
         window.location.replace(WEB_APP__URL + '/main');

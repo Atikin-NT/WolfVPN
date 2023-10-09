@@ -36,14 +36,14 @@ def add_peer():
             raise InterruptedError('client not exist')
         
         if int(client['amount']) <= 0:
-            raise InterruptedError('not money')
+            raise ex.NotEnoughMoney('not money')
         
         data, params = utils.apis[host_id-1].add_peer('wg0', request_data)
         AddPeer().execute(client_id, host_id, params)
-    except (ex.HostOrUserNotExist, ex.PeerAlreadyExist) as e:
-        logging.error(f'Add peer: clinet_id = {client_id}, host_id = {host_id}, params = {params}')
+    except (ex.HostOrUserNotExist, ex.PeerAlreadyExist, ex.NotEnoughMoney) as e:
+        logging.error(f'Add peer: clinet_id = {client_id}, host_id = {host_id}, ex = {e}')
         answer['status'] = False
-        answer['data'] = e
+        answer['data'] = str(e)
     
     return jsonify(answer)
 

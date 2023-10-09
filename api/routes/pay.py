@@ -50,7 +50,7 @@ def create_bill():
     except (ex.ClientNotExist, ValueError) as e:
         logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
-        answer['data'] = e
+        answer['data'] = str(e)
 
     return jsonify(answer)
 
@@ -96,7 +96,7 @@ def coupon_activate():
     except ValueError as e:
         logging.error(f'activate code and update amount: client_id = {client_id}, coupon = {coupon}, ex = {e}')
         answer['status'] = False
-        answer['data'] = e
+        answer['data'] = str(e)
     
     return jsonify(answer)
 
