@@ -50,7 +50,7 @@ def debit(api_list):
 def auto_daily_debit():
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
 
-    schedule.every().seconds.do(debit, api_list=utils.apis)
+    schedule.every().day.at('12:00').do(debit, api_list=utils.apis)
     while True:
         schedule.run_pending()
         time.sleep(1)
