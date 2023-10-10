@@ -6,18 +6,18 @@ import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
-bot_config = config['bot-test']
-
-is_test = bot_config['is_test']
-TOKEN = bot_config['key']
+is_test = config['settings']['is_test']
 
 if is_test:
+    bot_config = config['bot-test']
     session = AiohttpSession(
         api=TEST
     )
 else:
+    bot_config = config['bot']
     session = None
 
+TOKEN = bot_config['key']
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
 
