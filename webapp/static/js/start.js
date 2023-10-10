@@ -43,7 +43,7 @@ async function user_register(user_id, username, first_name) {
     if (!res['status']) {
         tg.showAlert('Ошибка сервера, напишите в тех поддержку');
     } else {
-        window.location.replace("http://127.0.0.1:5000/main");
+        window.location.replace(WEB_APP__URL + "/main");
     }
 }
 
