@@ -111,7 +111,7 @@ function pay_history(){
 
 // тех поддержка
 function help(){
-    tg.openTelegramLink('https://t.me/wolfvpn_help_bot');
+    tg.openTelegramLink('https://t.me/wolf0vpn_help_bot');
 }
 
 // получение информации о пользователе
