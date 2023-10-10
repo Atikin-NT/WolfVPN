@@ -3,6 +3,8 @@ FROM python:3.10-alpine
 COPY . /app
 COPY config.ini /app/config.ini
 COPY ./requirements.txt /app/requirements.txt
+COPY ./ssl.crt /app/ssl.crt
+COPY ./ssl.key /app/ssl.key
 
 WORKDIR /app
 
