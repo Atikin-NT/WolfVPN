@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from db.clients import GetClientById, AddClient
+from db.clients import GetClientById, AddClient, UpdateClientAmount
 from db.peers import GetPeerByClientId
 from db.hosts import GetAllHosts
 import db.exeption as ex
@@ -55,6 +55,7 @@ def add_user():
 
     try:
         AddClient().execute(client_id, name)
+        UpdateClientAmount().execute(client_id, DAY_PAY * 2)
     except (ValueError, ex.ClientAlreadyExist) as e:
         logging.error(f'add client: client_id = {client_id}, ex = {e}, name = {name}')
         answer['status'] = False

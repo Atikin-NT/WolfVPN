@@ -16,4 +16,4 @@ RUN apk update && apk add python3-dev \
 
 RUN pip install -r requirements.txt
 
-CMD [ "python", "app.py" ]
+CMD ["gunicorn", "--certfile", "ssl.crt", "--keyfile", "ssl.key", "-b", "0.0.0.0:8443", "wsgi:app"]

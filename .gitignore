@@ -17,3 +17,7 @@ __pycache__
 
 # monitoring
 *.db
+
+# SSL
+*.crt
+*.key

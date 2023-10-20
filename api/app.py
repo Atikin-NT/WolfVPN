@@ -38,6 +38,19 @@ def check():
 
 dashboard.bind(app)
 
+def preload():
+    logging.basicConfig(filename="app.log",
+                        level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(message)s",
+                        filemode="w")
+    logging.info('Start wolfvpn')
+    
+    p = mp.Process(target=debit.auto_daily_debit, daemon=True)
+    p.start()
+
+    Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
+    CreateTable().execute()
+
 
 if __name__ == '__main__':
     logging.basicConfig(filename="app.log",
