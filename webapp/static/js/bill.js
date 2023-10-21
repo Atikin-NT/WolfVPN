@@ -1,4 +1,4 @@
-let li_bill = `<p>Сумма: <span>{amount} ₽</span></p>
+let li_bill = `<p>Сумма: <span>{amount} W</span></p>
                 <p>Дата: <span>{date}</span></p>
                 <p>Статус: <span>{status}</span></p>`;
 

@@ -48,6 +48,7 @@ button:hover{
 .amount p span{
     font-size: 0.7em;
     color: #828594;
+    font-family: 'Raleway';
 }
 
 .amount button{

@@ -134,7 +134,7 @@ async function get_user_info(user_id){
 // загрузка на фронт информации о пользователе
 function set_user_info(user_info){
     let user_amount = document.getElementById('user_amount');
-    user_amount.innerHTML = `${user_info['amount']},00<span> ₽</span>`;
+    user_amount.innerHTML = `${user_info['amount']},00<span> W</span>`;
 
     let user_left_days = document.getElementById('user_left_days');
     user_left_days.textContent = user_info['day_left'];
