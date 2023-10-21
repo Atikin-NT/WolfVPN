@@ -65,4 +65,4 @@ if __name__ == '__main__':
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
     CreateTable().execute()
 
-    app.run(host='0.0.0.0', port=5000, ssl_context=('./ssl.crt', './ssl.key'))
+    app.run(port=5001)

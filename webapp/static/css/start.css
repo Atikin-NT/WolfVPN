@@ -1,8 +1,18 @@
 @font-face {
 	font-family: "RobotoMono-Bold";
-	src: url('../fonts/RobotoMono-Bold.ttf') format('truetype'),
-		 url('../fonts/RobotoMono-Regular.ttf') format('truetype'),
-		 url('../fonts/RobotoMono-Light.ttf') format('truetype');
+	src: url('../fonts/RobotoMono-Bold.ttf') format('truetype');
+}
+@font-face {
+	font-family: "RobotoMono-Regular";
+	src: url('../fonts/RobotoMono-Regular.ttf') format('truetype');
+}
+@font-face {
+	font-family: "RobotoMono-Light";
+	src: url('../fonts/RobotoMono-Light.ttf') format('truetype');
+}
+@font-face {
+	font-family: "Raleway";
+	src: url('../fonts/Raleway-Regular.ttf') format('truetype');
   }
 
 body {
@@ -72,6 +82,13 @@ li p{
 .price{
 	justify-content: center;
 	text-align: center;
+	flex-direction: column;
+	padding: 0 10px;
+}
+
+.price p span{
+	color: #7D94D8;
+	font-family: 'Raleway';
 }
 
 .price-text{

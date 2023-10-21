@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;700&family=Raleway&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/telegram-web-app.js') }}"></script>
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/start.js') }}"></script>
@@ -41,7 +41,13 @@
             <h1>Цена</h1>
             <ul>
                 <li class="price">
-                    <p class="price-text">5 ₽/день или 150 ₽/мес за одно подключение</p>
+                    <p class="price-text">5 <span>W</span> / день или 150 <span>W</span> / мес за одно подключение</p>
+                </li>
+                <li class="price">
+                    <p class="price-text">1 W = 1 ₽</p>
+                </li>
+                <li class="price">
+                    <p class="price-text">W это внутренняя валюта, которую вы можете приобрести за <span>USTD</span>, <span>TON</span> или <span>BTC</span></p>
                 </li>
             </ul>
         </div>

@@ -1,8 +1,8 @@
-// const SERVER_URL = 'http://127.0.0.1:5001';
-// const WEB_APP__URL = 'http://127.0.0.1:5000';
+const SERVER_URL = 'http://127.0.0.1:5001';
+const WEB_APP__URL = 'http://127.0.0.1:5000';
 
-const SERVER_URL = 'https://wolfvpn.ru:5000';
-const WEB_APP__URL = 'https://wolfvpn.ru';
+// const SERVER_URL = 'https://wolfvpn.ru:5000';
+// const WEB_APP__URL = 'https://wolfvpn.ru';
 /**
  *  Выполнение запроса
  * @param {string} url адрес для запроса
