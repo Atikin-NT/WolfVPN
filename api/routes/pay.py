@@ -3,21 +3,47 @@ from db.pay_history import AddBill, UpdateBillStatus, GetBillById
 from db.clients import GetClientById, UpdateClientAmount
 from db.codes import GetCode, ActivateCode
 import db.exeption as ex
-import yoomoney
+import requests
 import utils
 import configparser
 import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
-yoomoney_config = config['yoomoney']
+ton_wallet_config = config['ton_wallet']
+wallet_api = ton_wallet_config['api']
 
 pay_api = Blueprint('pay_api', __name__)
 
 
+def create_order(client_id: int, amount: int, order_id: int) -> requests.Response:
+    h = {
+        'Wpay-Store-Api-Key': wallet_api,
+    }
+    payload = {
+        "amount": {
+            "currencyCode": "RUB",
+            "amount": str(amount)
+        },
+        "description": f"Пополнение счета WolfVPN в размере {amount}",
+        "returnUrl": "https://t.me/wolf0vpn_bot",
+        "failReturnUrl": "https://t.me/wolf0vpn_bot",
+        "customData": f"{client_id} {amount} {order_id}",
+        "externalId": str(order_id),
+        "timeoutSeconds": 10800,
+        "customerTelegramUserId": client_id
+    }
+    r = requests.post(
+        'https://pay.wallet.tg/wpay/store-api/v1/order',
+        headers=h,
+        json=payload
+    )
+
+    return r
+
 @pay_api.route('/api/v1.0/create_bill', methods=['POST'])
 def create_bill():
-    """создание чека юмани
+    """создание чека ton wallet
 
     Args(POST):
         client_id (int): id пользователя из телеги
@@ -37,16 +63,18 @@ def create_bill():
 
     try:
         bill_id = AddBill().execute(client_id, amount)
-        quickpay = yoomoney.Quickpay(
-            receiver=yoomoney_config['receiver'],
-            quickpay_form="shop",
-            targets="WolfVPN",
-            paymentType="SB",
-            sum=amount,
-            label=f'{bill_id}_{client_id}_{amount}'
-        )
+        create_order_response = create_order(client_id, amount, bill_id)
 
-        answer['data'] = {'bill': quickpay.redirected_url}
+        if create_order_response.status_code != 200:
+            raise InterruptedError("can't create order")
+
+        order_data = create_order_response.json()
+
+        if order_data['status'] != 'SUCCESS':
+            logging.error(f'Cant create order, msg={order_data["message"]}')
+            raise InterruptedError("can't create order status error")
+
+        answer['data'] = {'bill': order_data['directPayLink']}
     except (ex.ClientNotExist, ValueError) as e:
         logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
@@ -101,9 +129,9 @@ def coupon_activate():
     return jsonify(answer)
 
 
-@pay_api.route('/api/v1.0/yoomoney_callback', methods=['POST'])
+@pay_api.route('/api/v1.0/wallet_callback', methods=['POST'])
 def get_pay():
-    """обработчик callback с yoomoney
+    """обработчик callback с ton wallet
     Обновляет баланс пользователя взависимости от параметров с юмани
     """
     withdraw_amount = int(request.form.get("withdraw_amount").split('.')[0])

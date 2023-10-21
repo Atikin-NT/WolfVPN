@@ -48,7 +48,7 @@ async function create_bill(){
         return;
     }
     
-    tg.MainButton.setText('Оплатить квитанцию');
+    tg.MainButton.setText('Pay via Wallet');
     tg.MainButton.color = '#FF0000';
     tg.MainButton.onClick(function(){
         open_bill(res['data']['bill']);
