@@ -7,11 +7,15 @@ import requests
 import utils
 import configparser
 import logging
+import base64
+import hmac
+import hashlib
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 ton_wallet_config = config['ton_wallet']
 wallet_api = ton_wallet_config['api']
+webhook = ton_wallet_config['webhook']
 
 pay_api = Blueprint('pay_api', __name__)
 
@@ -132,18 +136,37 @@ def coupon_activate():
 @pay_api.route('/api/v1.0/wallet_callback', methods=['POST'])
 def get_pay():
     """обработчик callback с ton wallet
-    Обновляет баланс пользователя взависимости от параметров с юмани
+    Обновляет баланс пользователя взависимости от параметров с wallet
     """
-    withdraw_amount = int(request.form.get("withdraw_amount").split('.')[0])
-    label = request.form.get("label")
-    bill_id, client_id, amount = label.split('_')
-    bill_id = int(bill_id)
-    client_id = int(client_id)
-    amount = int(amount)
 
-    logging.info(f'get_pay: label = {label}, withdraw_amount = {withdraw_amount}')
+    timestamp = request.headers['WalletPay-Timestamp']
+    wallet_sign = request.headers['WalletPay-Signature']
+    body = request.get_json()
+
+    logging.info(f'get_pay: timestamp = {timestamp}, wallet_sign = {wallet_sign}, body = {body}')
+
+    sign = compute_signature(
+        wpayStoreApiKey = wallet_api,
+        httpMethod = "POST",
+        uriPath = webhook,
+        timestamp = timestamp,
+        body = str(body)
+    )
+
+    logging.info(f'get_pay: sign = {sign}')
+
+    if wallet_sign != sign:
+        raise InterruptedError('sing not equal')
+    
+    if body['type'] != 'ORDER_PAID':
+        raise InterruptedError('Order failed')
+    
+    bill_id = body['payload']['externalId']
+    amount = int(body['payload']['orderAmount']['amount'])
+
 
     bill = GetBillById().execute(bill_id)
+    client_id = bill['client_id']
     assert int(bill['amount']) == amount
     
     UpdateBillStatus().execute(bill_id, 2)
@@ -154,3 +177,17 @@ def get_pay():
     UpdateClientAmount().execute(client_id, new_amount)
 
     return '', 200
+
+
+def compute_signature(
+    wpayStoreApiKey,
+    httpMethod,
+    uriPath,
+    timestamp,
+    body,
+):
+    base64body = base64.b64encode(body.encode()).decode()
+    stringToSign = f"{httpMethod}.{uriPath}.{timestamp}.{base64body}"
+    mac = hmac.new(wpayStoreApiKey.encode(), stringToSign.encode(), hashlib.sha256)
+    byteArraySignature = mac.digest()
+    return base64.b64encode(byteArraySignature).decode()
