@@ -56,7 +56,7 @@ def create_bill():
     logging.info('create_bill')
     answer = utils.json_template.copy()
     request_data = request.get_json()
-    if 'client_id' not in request_data or 'amount' not in request_data or int(request_data['amount']) < 20 or int(request_data['amount']) > 500:
+    if 'client_id' not in request_data or 'amount' not in request_data or int(request_data['amount']) < 0 or int(request_data['amount']) > 500:
         logging.error(f'invalid params in create_bill: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and amount not presented'
@@ -68,6 +68,7 @@ def create_bill():
     try:
         bill_id = AddBill().execute(client_id, amount)
         create_order_response = create_order(client_id, amount, bill_id)
+        logging.info(f'{create_order_response}')
 
         if create_order_response.status_code != 200:
             raise InterruptedError("can't create order")
@@ -78,7 +79,7 @@ def create_bill():
             logging.error(f'Cant create order, msg={order_data["message"]}')
             raise InterruptedError("can't create order status error")
 
-        answer['data'] = {'bill': order_data['directPayLink']}
+        answer['data'] = {'bill': order_data['data']['directPayLink']}
     except (ex.ClientNotExist, ValueError) as e:
         logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
@@ -106,6 +107,7 @@ def coupon_activate():
 
     client_id = int(request_data['client_id'])
     coupon = str(request_data['coupon'])
+    logging.info(f'coupon = {coupon}')
     answer['data'] = 'ok'
 
     try:
@@ -142,6 +144,7 @@ def get_pay():
     timestamp = request.headers['WalletPay-Timestamp']
     wallet_sign = request.headers['WalletPay-Signature']
     body = request.get_json()
+    r_data = request.data
 
     logging.info(f'get_pay: timestamp = {timestamp}, wallet_sign = {wallet_sign}, body = {body}')
 
@@ -150,10 +153,11 @@ def get_pay():
         httpMethod = "POST",
         uriPath = webhook,
         timestamp = timestamp,
-        body = str(body)
+        body = r_data
     )
 
     logging.info(f'get_pay: sign = {sign}')
+    body = body[0]
 
     if wallet_sign != sign:
         raise InterruptedError('sing not equal')
@@ -186,7 +190,7 @@ def compute_signature(
     timestamp,
     body,
 ):
-    base64body = base64.b64encode(body.encode()).decode()
+    base64body = base64.b64encode(body).decode()
     stringToSign = f"{httpMethod}.{uriPath}.{timestamp}.{base64body}"
     mac = hmac.new(wpayStoreApiKey.encode(), stringToSign.encode(), hashlib.sha256)
     byteArraySignature = mac.digest()
