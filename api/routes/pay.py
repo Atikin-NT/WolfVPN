@@ -162,7 +162,7 @@ def get_pay():
         raise InterruptedError('Order failed')
     
     bill_id = body['payload']['externalId']
-    amount = int(body['payload']['orderAmount']['amount'])
+    amount = int(float(body['payload']['orderAmount']['amount']))
 
 
     bill = GetBillById().execute(bill_id)
