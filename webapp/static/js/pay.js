@@ -50,6 +50,7 @@ async function create_bill(){
     
     tg.MainButton.setText('Pay via Wallet');
     tg.MainButton.color = '#FF0000';
+    tg.MainButton.offClick();
     tg.MainButton.onClick(function(){
         open_bill(res['data']['bill']);
     });
