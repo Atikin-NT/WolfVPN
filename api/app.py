@@ -12,6 +12,7 @@ import debit
 import multiprocessing as mp
 import configparser
 import logging
+import bot
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -43,10 +44,14 @@ def preload():
                         level=logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s",
                         filemode="w")
+    
     logging.info('Start wolfvpn')
     
     p = mp.Process(target=debit.auto_daily_debit, daemon=True)
     p.start()
+
+    bot_run_p = mp.Process(target=bot.main, daemon=True)
+    bot_run_p.start()
 
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
     CreateTable().execute()
