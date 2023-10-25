@@ -30,7 +30,7 @@ class CreateTable(Connection):
             'params': 'jsonb not null'
             }, 'PRIMARY KEY (client_id, host_id)')
         Connection.db.create_table('codes', {
-            'code': 'serial PRIMARY KEY',
+            'code': 'char(7) PRIMARY KEY',
             'amount': 'int not null',
             'activated': 'bool default false'
         })
