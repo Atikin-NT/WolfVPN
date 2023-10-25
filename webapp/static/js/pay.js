@@ -56,12 +56,38 @@ async function create_bill(){
 }
 
 
+// получение информации о пользователе
+async function get_user_info(user_id){
+    let res = await Request(SERVER_URL + `/api/v1.0/user/${user_id}`, {
+        method: "GET"
+    });
+    if (res == null) {
+        tg.showAlert('Сервер не отвечает, напишите в тех поддержку');
+        return;
+    }
+    if (!res['status']) {
+        tg.showAlert('Ошибка сервера, напишите в тех поддержку');
+        return;
+    }
+
+    return res['data'];
+}
+
+// загрузка на фронт информации о пользователе
+function set_user_info(user_info){
+    let user_amount = document.getElementsByClassName('user_amount')[0];
+    user_amount.innerHTML = `${user_info['amount']},00<span> W</span>`;
+}
+
 async function main(){
     tg.MainButton.setText('Получить квитанцию');
     tg.MainButton.show();
     tg.MainButton.onClick(function(){
         create_bill();
     });
+
+    const user_info = await get_user_info(USER.id);
+    set_user_info(user_info);
 
     tg.BackButton.show()
     tg.BackButton.onClick(function(){

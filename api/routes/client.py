@@ -88,10 +88,15 @@ def get_client(client_id: int):
 
     client_peers = [peer | {'region': utils.dict_search(regions, 'id', peer['host_id'], 'region')}
                     for peer in client_peers]
+    
+    if len(client_peers) == 0 or client['amount'] == 0:
+        day_left = 'ꝏ'
+    else:
+        day_left = client['amount'] // (DAY_PAY * len(client_peers))
 
     answer['data'] = {
         'amount': client['amount'],
-        'day_left': client['amount'] // DAY_PAY,
+        'day_left': day_left,
         'peers': client_peers
     }
     return jsonify(answer)

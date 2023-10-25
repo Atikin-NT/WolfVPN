@@ -28,10 +28,10 @@ def debit(api_list):
         client_id = user['id']
         amount = user['amount']
 
-        if amount <= 0: continue
-
         peers = GetPeerByClientId().execute(client_id)
         peer_count = len(peers)
+
+        if peer_count <= 0: continue
 
         for i in range(peer_count):
             peer = peers[i]
