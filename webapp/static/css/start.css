@@ -19,12 +19,13 @@ body {
 	margin: 0;
 	padding: 10px;
 	font-size: 18px;
-	color: var(--tg-theme-text-color);
-	background: var(--tg-theme-bg-color);
+	color: #f5f5f5;
+	background: #282e33;
 }
 
 .container {
-    max-width: 390px;
+	margin: 0 auto;
+    max-width: 600px;
 }
 
 h1{

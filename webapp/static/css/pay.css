@@ -66,13 +66,13 @@
   background: #212332;
   border: none;
   border-radius: 10px;
-  color: var(--tg-theme-text-color);
+  color: #f5f5f5;
   padding: 10px;
   font-size: 1em;
 }
 
 .input__field:focus{
-  outline-color: var(--tg-theme-button-color);
+  outline-color: #3fc1b0;
 }
 
 .form p{
