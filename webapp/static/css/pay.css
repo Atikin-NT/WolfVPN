@@ -14,7 +14,7 @@
 .account {
   width: 95%;
   border-radius: 20px;
-  background-color: #212332;
+  background-color: var(--tg-theme-secondary-bg-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,15 +37,15 @@
   width: 90%;
   text-align: left;
   font-size: 2em;
-  font-family: 'RobotoMono-Bold';
-  font-weight: 700;
-  color: white;
+  font-family: 'RobotoMono-Regular';
+	font-weight: 500;
+  color: var(--tg-theme-text-color);
   margin: 10px 0;
 }
 
 .user_amount span{
   font-size: 0.7em;
-  color: #828594;
+  color: var(--tg-theme-hint-color);
 }
 
 .form {
@@ -63,10 +63,10 @@
 
 .input__field{
   width: 90%;
-  background: #212332;
+  background: var(--tg-theme-secondary-bg-color);
   border: none;
   border-radius: 10px;
-  color: #f5f5f5;
+  color: var(--tg-theme-text-color);
   padding: 10px;
   font-size: 1em;
 }
@@ -77,7 +77,7 @@
 
 .form p{
   font-size: 0.7em;
-  color: #828594;
+  color: var(--tg-theme-hint-color);
   text-align: left;
   width: 90%;
 }

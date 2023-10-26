@@ -18,7 +18,7 @@ button{
 }
 
 button:active{
-    background-color: #828594;
+    background-color: var(--tg-theme-hint-color);
 }
 
 button:hover{
@@ -39,15 +39,15 @@ button:hover{
 
 .amount p{
     font-size: 2em;
-	font-family: 'RobotoMono-Bold';
-	font-weight: 700;
-    color: white;
+	font-family: 'RobotoMono-Regular';
+	font-weight: 500;
+    color: var(--tg-theme-text-color);
     margin: 10px 0;
 }
 
 .amount p span{
     font-size: 0.7em;
-    color: #828594;
+    color: var(--tg-theme-hint-color);
     font-family: 'Raleway';
 }
 
@@ -62,7 +62,7 @@ button:hover{
     font-size: 0.9em;
 	font-family: 'RobotoMono-Regular';
 	font-weight: 400;
-    color: #828594;
+    color: var(--tg-theme-hint-color);
 }
 
 .action-list{

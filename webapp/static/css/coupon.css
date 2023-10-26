@@ -11,10 +11,10 @@ input {
   border: none;
   padding: 0;
   width: 10.5ch;
-  background: repeating-linear-gradient(90deg, dimgrey 0, dimgrey 1ch, transparent 0, transparent 1.5ch) 0 100%/ 10ch 2px no-repeat;
+  background: repeating-linear-gradient(90deg, var(--tg-theme-hint-color) 0, var(--tg-theme-hint-color) 1ch, transparent 0, transparent 1.5ch) 0 100%/ 10ch 2px no-repeat;
   font: 5ch droid sans mono, consolas, monospace;
   letter-spacing: 0.5ch;
-  color: #f5f5f5;
+  color: var(--tg-theme-text-color);
 }
 
 input:focus {

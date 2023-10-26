@@ -13,9 +13,9 @@ li{
 
 li p{
     font-size: 1em;
-	font-family: 'RobotoMono-Bold';
-	font-weight: 600;
-    color: white;
+	font-family: 'RobotoMono-Regular';
+	font-weight: 500;
+    color: var(--tg-theme-text-color);
     margin: 10px;
 }
 
@@ -23,5 +23,5 @@ li p span{
     font-size: 0.9em;
 	font-family: 'RobotoMono-Light';
 	font-weight: 300;
-    color: white;
+    color: var(--tg-theme-text-color);
 }
