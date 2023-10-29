@@ -94,3 +94,49 @@
 	color: #7D94D8;
 	font-family: 'Raleway';
 }
+
+.payment_type{
+  width: 90%;
+  margin-bottom: 15px;
+  background: var(--tg-theme-secondary-bg-color);
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.wallet{
+  border-radius: 10px 0 0 10px;
+}
+
+.yoomoney{
+  border-radius: 0 10px 10px 0;
+}
+
+.payment_type .option{
+  background: var(--tg-theme-secondary-bg-color);
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 10px;
+}
+
+input[type="radio"]{
+  display: none;
+}
+
+#wallet:checked:checked ~ .wallet,
+#yoomoney:checked:checked ~ .yoomoney{
+  background: var(--tg-theme-button-color);
+}
+.payment_type .option span{
+  font-size: 0.8em;
+  font-family: 'RobotoMono-Regular';
+  color: var(--tg-theme-text-color);
+}

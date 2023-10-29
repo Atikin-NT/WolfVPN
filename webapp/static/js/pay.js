@@ -19,9 +19,18 @@ function open_bill(bill_url){
     })
 }
 
+function get_payment_type(){
+    const wallet_type = document.getElementById('wallet');
+
+    if (wallet_type.checked)
+        return 'wallet';
+    return 'yoomoney';
+}
+
 
 async function create_bill(){
     let amount_input = document.getElementById('amount');
+    let payment_type = get_payment_type();
     if (isNotEmpty(amount_input) == false){
         tg.showAlert('Заполните пожалуйста поле перед отправкой');
         return;
@@ -36,6 +45,7 @@ async function create_bill(){
         body: JSON.stringify({
             client_id: USER.id,
             amount: amount_input.value,
+            type: payment_type,
         })
     });
 
@@ -48,7 +58,7 @@ async function create_bill(){
         return;
     }
     
-    tg.MainButton.setText('Pay via Wallet');
+    tg.MainButton.setText(`Pay via ${payment_type}`);
     tg.MainButton.color = '#FF0000';
     tg.MainButton.offClick();
     tg.MainButton.onClick(function(){

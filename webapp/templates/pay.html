@@ -24,7 +24,17 @@
             </div>
         </div>
         <div class="form">
-            <h3>Сумма</h3>
+            <h3>Оплата</h3>
+            <div class="payment_type">
+                <input type="radio" name="select" id="wallet" checked>
+                <input type="radio" name="select" id="yoomoney">
+                <label for="wallet" class="option wallet">
+                    <span>Wallet (Crypto)</span>
+                </label>
+                <label for="yoomoney" class="option yoomoney">
+                    <span>Yoomoney (Rub)</span>
+                </label>
+            </div>
             <input onkeypress="if ( isNaN( String.fromCharCode(event.keyCode) )) return false;" type="text" class="input__field" placeholder="Введите сумму" name="amount_for_pay" id='amount' required />
             <p>Минимум: 1 ₽, максимум: 500 ₽</p>
             <p>Оплата происходит в криптовалюте <span>USDT, BTC, TON</span>. Конвертация из рублей в криптовалюту происходит автоматически</p>

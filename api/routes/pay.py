@@ -10,6 +10,7 @@ import logging
 import base64
 import hmac
 import hashlib
+from yoomoney import Quickpay
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -17,10 +18,14 @@ ton_wallet_config = config['ton_wallet']
 wallet_api = ton_wallet_config['api']
 webhook = ton_wallet_config['webhook']
 
+yoomoney_config = config['yoomoney']
+receiver = yoomoney_config['receiver']
+yoomoney_secret = yoomoney_config['secret']
+
 pay_api = Blueprint('pay_api', __name__)
 
 
-def create_order(client_id: int, amount: int, order_id: int) -> requests.Response:
+def create_order(client_id: int, amount: int, order_id: int) -> str:
     h = {
         'Wpay-Store-Api-Key': wallet_api,
     }
@@ -43,11 +48,35 @@ def create_order(client_id: int, amount: int, order_id: int) -> requests.Respons
         json=payload
     )
 
-    return r
+    logging.info(f'{r}')
+
+    if r.status_code != 200:
+        raise InterruptedError("can't create order")
+
+    order_data = r.json()
+
+    if order_data['status'] != 'SUCCESS':
+        logging.error(f'Cant create order, msg={order_data["message"]}')
+        raise InterruptedError("can't create order status error")
+
+    return order_data['data']['directPayLink']
+
+
+def create_yoomoney_order(amount: int, order_id: int) -> str:
+    quickpay = Quickpay(
+        receiver=receiver,
+        quickpay_form="shop",
+        targets="WolfVPN",
+        paymentType="SB",
+        sum=amount,
+        label=str(order_id),
+    )
+    return quickpay.redirected_url
+
 
 @pay_api.route('/api/v1.0/create_bill', methods=['POST'])
 def create_bill():
-    """создание чека ton wallet
+    """создание чека ton wallet или yoomoney
 
     Args(POST):
         client_id (int): id пользователя из телеги
@@ -56,7 +85,8 @@ def create_bill():
     logging.info('create_bill')
     answer = utils.json_template.copy()
     request_data = request.get_json()
-    if 'client_id' not in request_data or 'amount' not in request_data or int(request_data['amount']) < 0 or int(request_data['amount']) > 500:
+    if ('client_id' not in request_data or 'amount' not in request_data or 'type' not in request_data
+        or int(request_data['amount']) < 0 or int(request_data['amount']) > 500):
         logging.error(f'invalid params in create_bill: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and amount not presented'
@@ -64,22 +94,18 @@ def create_bill():
 
     client_id = int(request_data['client_id'])
     amount = int(request_data['amount'])
+    type = request_data['type']
 
     try:
         bill_id = AddBill().execute(client_id, amount)
-        create_order_response = create_order(client_id, amount, bill_id)
-        logging.info(f'{create_order_response}')
+        if type == 'yoomoney':
+            create_order_url = create_yoomoney_order(amount, bill_id)
+        elif type == 'wallet':
+            create_order_url = create_order(client_id, amount, bill_id)
+        else:
+            raise InterruptedError('type of pay not found')
 
-        if create_order_response.status_code != 200:
-            raise InterruptedError("can't create order")
-
-        order_data = create_order_response.json()
-
-        if order_data['status'] != 'SUCCESS':
-            logging.error(f'Cant create order, msg={order_data["message"]}')
-            raise InterruptedError("can't create order status error")
-
-        answer['data'] = {'bill': order_data['data']['directPayLink']}
+        answer['data'] = {'bill': create_order_url}
     except (ex.ClientNotExist, ValueError) as e:
         logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
@@ -195,3 +221,39 @@ def compute_signature(
     mac = hmac.new(wpayStoreApiKey.encode(), stringToSign.encode(), hashlib.sha256)
     byteArraySignature = mac.digest()
     return base64.b64encode(byteArraySignature).decode()
+
+@pay_api.route('/api/v1.0/yoomoney_callback', methods=['POST'])
+def get_pay_yoomoney():
+    """обработчик callback с yoomoney
+    Обновляет баланс пользователя взависимости от параметров с yoomoney
+    """
+    form_data = request.form.to_dict()
+    amount = int(float(form_data['form_data']))
+    bill_id = form_data['label']
+
+    logging.info(f'get_pay(yoomoney): amount = {amount}, bill_id = {bill_id}, form_data = {form_data}')
+
+    if yoomoney_sign_check(form_data) is False:
+        logging.error('Sign not equal in yoomoney')
+        raise InterruptedError('Sign not equal in yoomoney')
+
+    bill = GetBillById().execute(bill_id)
+    client_id = bill['client_id']
+    assert int(bill['amount']) == amount
+    
+    UpdateBillStatus().execute(bill_id, 2)
+
+    client = GetClientById().execute(client_id)
+
+    new_amount = int(client['amount']) + amount
+    UpdateClientAmount().execute(client_id, new_amount)
+
+    return '', 200
+
+
+def yoomoney_sign_check(data: dict) -> bool:
+    string_for_test = f"""{data['notification_type']}&{data['operation_id']}&{data['amount']}&{data['currency']}&{data['datetime']}&{data['sender']}&{data['codepro']}&{yoomoney_secret}&{data['label']}"""
+    sha_code = hashlib.sha1(string_for_test.encode())
+    sign = sha_code.hexdigest()
+    logging.info(f'Yoomoney sign: sign = {sign}, sha1_hash = {data["sha1_hash"]}')
+    return sign == data['sha1_hash']
