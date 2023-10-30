@@ -60,7 +60,7 @@ async function create_bill(){
     
     tg.MainButton.setText(`Pay via ${payment_type}`);
     tg.MainButton.color = '#FF0000';
-    tg.MainButton.offClick();
+    tg.MainButton.offClick(create_bill);
     tg.MainButton.onClick(function(){
         open_bill(res['data']['bill']);
     });
@@ -93,9 +93,7 @@ function set_user_info(user_info){
 async function main(){
     tg.MainButton.setText('Получить квитанцию');
     tg.MainButton.show();
-    tg.MainButton.onClick(function(){
-        create_bill();
-    });
+    tg.MainButton.onClick(create_bill);
 
     const user_info = await get_user_info(USER.id);
     set_user_info(user_info);

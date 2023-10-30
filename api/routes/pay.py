@@ -228,10 +228,10 @@ def get_pay_yoomoney():
     Обновляет баланс пользователя взависимости от параметров с yoomoney
     """
     form_data = request.form.to_dict()
-    amount = int(float(form_data['amount']))
+    amount = int(float(form_data['withdraw_amount']))
     bill_id = form_data['label']
 
-    logging.info(f'get_pay(yoomoney): amount = {amount}, bill_id = {bill_id}, form_data = {form_data}')
+    logging.info(f'get_pay(yoomoney): withdraw_amount = {amount}, bill_id = {bill_id}, form_data = {form_data}')
 
     if yoomoney_sign_check(form_data) is False:
         logging.error('Sign not equal in yoomoney')
