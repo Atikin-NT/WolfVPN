@@ -7,6 +7,7 @@ import utils
 import configparser
 import logging
 from wireguard.api import API
+import os
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -30,6 +31,7 @@ def debit(api_list):
 
         peers = GetPeerByClientId().execute(client_id)
         peer_count = len(peers)
+        logging.info(f'update user balance/ User={client_id}, amount={amount}')
 
         if peer_count <= 0: continue
 
@@ -45,9 +47,11 @@ def debit(api_list):
 
         amount = 0 if amount < 0 else amount
         UpdateClientAmount().execute(client_id, amount)
+        logging.info(f'new user balance/ User={client_id}, amount={amount}')
 
 
 def auto_daily_debit():
+    logging.info(f'run database PID = {os.getpid()}, PPID = {os.getppid()}')
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
 
     schedule.every().day.at('12:00').do(debit, api_list=utils.apis)

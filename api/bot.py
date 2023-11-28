@@ -6,6 +6,7 @@ from aiogram.client.telegram import TEST
 import configparser
 import logging
 import asyncio
+import os
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -47,4 +48,5 @@ async def run_bot():
 
 
 def main():
+    logging.info(f'run bot PID = {os.getpid()}, PPID = {os.getppid()}')
     asyncio.run(run_bot())

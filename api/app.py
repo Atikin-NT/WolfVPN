@@ -56,8 +56,6 @@ def preload():
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
     CreateTable().execute()
 
-preload()
-
 
 if __name__ == '__main__':
     app.run(port=5001)
