@@ -13,6 +13,7 @@ import multiprocessing as mp
 import configparser
 import logging
 import bot
+import os
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -38,6 +39,8 @@ def check():
 
 
 dashboard.bind(app)
+Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
+CreateTable().execute()
 
 def preload():
     logging.basicConfig(filename="app.log",
