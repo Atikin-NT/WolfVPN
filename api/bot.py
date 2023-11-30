@@ -49,7 +49,7 @@ async def cmd_start(message: types.Message):
 async def cmd_start(message: types.Message):
     await message.answer(
         HELP_MSG,
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=ParseMode.HTML
     )
 
 async def run_bot():

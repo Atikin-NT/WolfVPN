@@ -65,9 +65,9 @@ WELCOME_MSG = """
 HELP_MSG = """
 Если вы не знаете, как подключить VPN, то следуйте следующей инструкции:
 1) Скачайте Wireguard.
-    [IOS](https://itunes.apple.com/us/app/wireguard/id1441195209?ls=1&mt=8)
-    [Android](https://play.google.com/store/apps/details?id=com.wireguard.android)
-    [Windows](https://download.wireguard.com/windows-client/wireguard-installer.exe)
+    <a href="https://itunes.apple.com/us/app/wireguard/id1441195209?ls=1&mt=8">IOS</a>
+    <a href="https://play.google.com/store/apps/details?id=com.wireguard.android">Android</a>
+    <a href="https://download.wireguard.com/windows-client/wireguard-installer.exe">Windows</a>
 2) Скачайте файл для подключения в нашем боте.
 3) Откройте его в приложении Wireguard.
 4) Приятного пользования! 
