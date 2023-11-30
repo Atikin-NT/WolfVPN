@@ -3,6 +3,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters.command import Command
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TEST
+from aiogram.enums.parse_mode import ParseMode
+from utils import HELP_MSG, WELCOME_MSG
 import configparser
 import logging
 import asyncio
@@ -31,7 +33,7 @@ async def send_file_to_user(client_id, input_file):
     await bot.session.close()
     await bot.send_document(client_id, document=input_file)
 
-@dp.message(Command("start", "help"))
+@dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     builder = InlineKeyboardBuilder()
     webAppTest = types.WebAppInfo(url="https://wolfvpn.ru")
@@ -39,8 +41,15 @@ async def cmd_start(message: types.Message):
         text="WolfVPN WebApp", web_app=webAppTest),
     )
     await message.answer(
-        "Чтобы открыть приложение, нажмите кнопку ниже или слева снизу",
+        WELCOME_MSG,
         reply_markup=builder.as_markup()
+    )
+
+@dp.message(Command("help"))
+async def cmd_start(message: types.Message):
+    await message.answer(
+        HELP_MSG,
+        parse_mode=ParseMode.MARKDOWN
     )
 
 async def run_bot():
@@ -50,3 +59,5 @@ async def run_bot():
 def main():
     logging.info(f'run bot PID = {os.getpid()}, PPID = {os.getppid()}')
     asyncio.run(run_bot())
+
+# https://telegra.ph/WolfVPN-Tutorial-11-30
