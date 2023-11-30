@@ -139,6 +139,9 @@ function set_user_info(user_info){
     let user_left_days = document.getElementById('user_left_days');
     user_left_days.textContent = user_info['day_left'];
 
+    let day_str = document.getElementById('day_str');
+    day_str.textContent = get_day_str(user_info['day_left']);
+
     let user_peers = user_info['peers'];
     let current_peers = document.getElementById('current-peers-ul');
 
