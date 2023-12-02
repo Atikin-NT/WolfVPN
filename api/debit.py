@@ -1,5 +1,5 @@
 import time
-import schedule
+import datetime
 from db.clients import GetAllClients, UpdateClientAmount
 from db.peers import GetPeerByClientId, RemovePeer
 from db.db_manager import Connection, DataBaseManager
@@ -16,7 +16,7 @@ db_config = config['database']
 
 
 def remove_peer(api: API, client_id: int, host_id: int, pubkey: str):
-    logging.info(f'delete peer: client_id = {client_id}, host_id = {host_id}')
+    logging.info(f'delete peer: client_id = {client_id}, host_id = {host_id}, PID = {os.getpid()}')
     res = api.remove_peer('wg0', [pubkey])
     if res is False:
         raise InterruptedError("Can't remove")
@@ -31,7 +31,7 @@ def debit(api_list):
 
         peers = GetPeerByClientId().execute(client_id)
         peer_count = len(peers)
-        logging.info(f'update user balance/ User={client_id}, amount={amount}')
+        logging.info(f'update user balance/ User={client_id}, amount={amount}, PID = {os.getpid()}')
 
         if peer_count <= 0: continue
 
@@ -47,14 +47,16 @@ def debit(api_list):
 
         amount = 0 if amount < 0 else amount
         UpdateClientAmount().execute(client_id, amount)
-        logging.info(f'new user balance/ User={client_id}, amount={amount}')
+        logging.info(f'new user balance/ User={client_id}, amount={amount}, PID = {os.getpid()}')
 
 
 def auto_daily_debit():
     logging.info(f'run database PID = {os.getpid()}, PPID = {os.getppid()}')
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
 
-    schedule.every().day.at('12:00').do(debit, api_list=utils.apis)
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        curr_time = datetime.datetime.now()
+        if curr_time.hour <= 1:
+            debit(utils.apis)
+            time.sleep(60*60)
+        time.sleep(60*30)
