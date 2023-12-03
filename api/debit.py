@@ -56,7 +56,7 @@ def auto_daily_debit():
 
     while True:
         curr_time = datetime.datetime.now()
-        if curr_time.hour <= 1:
+        if curr_time.hour < 1:
             debit(utils.apis)
             time.sleep(60*60)
-        time.sleep(60*30)
+        time.sleep(60*20)
