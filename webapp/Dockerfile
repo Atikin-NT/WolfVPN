@@ -9,4 +9,4 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-CMD ["gunicorn", "--certfile", "ssl.crt", "--keyfile", "ssl.key", "-b", "0.0.0.0:443", "app:app", "--preload"]
+CMD ["gunicorn", "--certfile", "ssl.crt", "--keyfile", "ssl.key", "-b", "0.0.0.0:443", "app:app"]
