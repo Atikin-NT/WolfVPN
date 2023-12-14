@@ -61,7 +61,7 @@ def auto_daily_debit(mp_queue):
 
     while True:
         curr_time = datetime.datetime.now()
-        if curr_time.hour < 24:
+        if curr_time.hour < 1:
             debit(utils.apis)
-            time.sleep(5)
-        time.sleep(2)
+            time.sleep(60*60)
+        time.sleep(60*20)
