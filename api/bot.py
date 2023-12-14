@@ -7,6 +7,7 @@ from aiogram.enums.parse_mode import ParseMode
 from utils import HELP_MSG, WELCOME_MSG
 import configparser
 import logging
+from logging.handlers import QueueHandler
 import asyncio
 import os
 
@@ -56,7 +57,11 @@ async def run_bot():
     await dp.start_polling(bot)
 
 
-def main():
+def main(mp_queue):
+    queue_handler = QueueHandler(mp_queue)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.addHandler(queue_handler)
     logging.info(f'run bot PID = {os.getpid()}, PPID = {os.getppid()}')
     asyncio.run(run_bot())
 

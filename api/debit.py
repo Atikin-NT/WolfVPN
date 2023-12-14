@@ -6,6 +6,7 @@ from db.db_manager import Connection, DataBaseManager
 import utils
 import configparser
 import logging
+from logging.handlers import QueueHandler
 from wireguard.api import API
 import os
 
@@ -50,13 +51,17 @@ def debit(api_list):
         logging.info(f'new user balance/ User={client_id}, amount={amount}, PID = {os.getpid()}')
 
 
-def auto_daily_debit():
+def auto_daily_debit(mp_queue):
+    queue_handler = QueueHandler(mp_queue)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(queue_handler)
     logging.info(f'run database PID = {os.getpid()}, PPID = {os.getppid()}')
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
 
     while True:
         curr_time = datetime.datetime.now()
-        if curr_time.hour < 1:
+        if curr_time.hour < 24:
             debit(utils.apis)
-            time.sleep(60*60)
-        time.sleep(60*20)
+            time.sleep(5)
+        time.sleep(2)

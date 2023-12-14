@@ -12,8 +12,11 @@ import debit
 import multiprocessing as mp
 import configparser
 import logging
+from logging.handlers import QueueHandler, QueueListener
 import bot
+from functools import wraps
 import os
+import time
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -42,22 +45,26 @@ dashboard.bind(app)
 
 
 def preload():
-    logging.basicConfig(filename="app.log",
-                        level=logging.INFO,
-                        format="%(asctime)s %(levelname)s %(message)s",
-                        filemode="w")
+    mp_queue = mp.Queue()
+    lg_handler = logging.FileHandler('app.log')
+    lg_handler.setFormatter(
+        logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    )
+
+    queue_listener = QueueListener(mp_queue, lg_handler)
+    queue_listener.start()
     
-    logging.info('Start wolfvpn')
-    
-    p = mp.Process(target=debit.auto_daily_debit, daemon=True)
+    p = mp.Process(target=debit.auto_daily_debit, daemon=True, args=(mp_queue,))
     p.start()
 
-    bot_run_p = mp.Process(target=bot.main, daemon=True)
+    bot_run_p = mp.Process(target=bot.main, daemon=True, args=(mp_queue,))
     bot_run_p.start()
 
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])
     CreateTable().execute()
 
+if __name__ != '__main__':
+    preload()
 
 if __name__ == '__main__':
     app.run(port=5001)
