@@ -3,10 +3,11 @@ import datetime
 from db.clients import GetAllClients, UpdateClientAmount
 from db.peers import GetPeerByClientId, RemovePeer
 from db.db_manager import Connection, DataBaseManager
+import bot
+import asyncio
 import utils
 import configparser
 import logging
-from logging.handlers import QueueHandler
 from wireguard.api import API
 import os
 
@@ -22,6 +23,27 @@ def remove_peer(api: API, client_id: int, host_id: int, pubkey: str, logger: log
     if res is False:
         raise InterruptedError("Can't remove")
     RemovePeer().execute(client_id, host_id)
+    asyncio.run(bot.delete_mess(client_id))
+
+
+def send_reminder_by_bot(client_id: int, amount: int, peer_count: int):
+    day_left = amount // (DAY_PAY * peer_count)
+    if day_left > 3 or day_left <= 0:
+        return
+    
+    day_text = {
+        '1': 'день',
+        '2': 'дня',
+        '3': 'дня'
+    }
+
+    msg = utils.REMINDER_MSG
+    msg = msg.format(
+        val = amount,
+        days = day_left,
+        day_text = day_text[f'{day_left}']
+    )
+    asyncio.run(bot.send_reminder(client_id, msg))
 
 
 def debit(api_list, logger):
@@ -47,6 +69,9 @@ def debit(api_list, logger):
             amount -= DAY_PAY
 
         amount = 0 if amount < 0 else amount
+
+        send_reminder_by_bot(client_id, amount, peer_count)
+
         UpdateClientAmount().execute(client_id, amount)
         logger.info(f'new user balance/ User={client_id}, amount={amount}, PID = {os.getpid()}')
 

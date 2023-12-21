@@ -59,7 +59,6 @@ def qrcode():
         client_id (int): id пользователя из телеги
         host_id (int): id сервера из БД
     """
-    logger.info('get qrcode')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'host_id' not in request_data:

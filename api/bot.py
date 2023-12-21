@@ -4,10 +4,9 @@ from aiogram.filters.command import Command
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TEST
 from aiogram.enums.parse_mode import ParseMode
-from utils import HELP_MSG, WELCOME_MSG
+from utils import HELP_MSG, WELCOME_MSG, PEER_DELETE_MSG
 import configparser
 import logging
-from logging.handlers import QueueHandler
 import asyncio
 import os
 
@@ -36,12 +35,42 @@ async def send_file_to_user(client_id, input_file):
     await bot.session.close()
     await bot.send_document(client_id, document=input_file)
 
+
+async def send_reminder(client_id: int, text: str):
+    builder = InlineKeyboardBuilder()
+    webapp = types.WebAppInfo(url="https://wolfvpn.ru/pay")
+    builder.add(types.InlineKeyboardButton(
+        text="Пополнить счет", web_app=webapp),
+    )
+    await bot.session.close()
+    await bot.send_message(
+        chat_id=client_id,
+        text=text,
+        reply_markup=builder.as_markup(),
+        parse_mode=ParseMode.HTML
+    )
+
+
+async def delete_mess(client_id: int):
+    builder = InlineKeyboardBuilder()
+    webapp = types.WebAppInfo(url="https://wolfvpn.ru/pay")
+    builder.add(types.InlineKeyboardButton(
+        text="Пополнить счет", web_app=webapp),
+    )
+    await bot.session.close()
+    await bot.send_message(
+        chat_id=client_id,
+        text=PEER_DELETE_MSG,
+        reply_markup=builder.as_markup()
+    )
+
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     builder = InlineKeyboardBuilder()
-    webAppTest = types.WebAppInfo(url="https://wolfvpn.ru")
+    webapp = types.WebAppInfo(url="https://wolfvpn.ru")
     builder.add(types.InlineKeyboardButton(
-        text="WolfVPN WebApp", web_app=webAppTest),
+        text="WolfVPN WebApp", web_app=webapp),
     )
     await message.answer(
         WELCOME_MSG,
@@ -49,7 +78,7 @@ async def cmd_start(message: types.Message):
     )
 
 @dp.message(Command("help"))
-async def cmd_start(message: types.Message):
+async def cmd_help(message: types.Message):
     await message.answer(
         HELP_MSG,
         parse_mode=ParseMode.HTML
