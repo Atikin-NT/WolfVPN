@@ -12,6 +12,7 @@ config.read('./config.ini')
 DAY_PAY = int(config['economic']['day_pay'])
 
 client_api = Blueprint('client_api', __name__)
+logger = logging.getLogger('gunicorn.error')
 
 
 @client_api.route('/api/v1.0/check_user/<int:user_id>', methods=['GET'])
@@ -21,7 +22,7 @@ def user_login_check(user_id: int):
     Args:
         user_id (int): id пользователя из телеги
     """
-    logging.info(f'user_login_check, user_id = {user_id}')
+    logger.info(f'user_login_check, user_id = {user_id}')
     client = GetClientById().execute(user_id)
     answer = utils.json_template.copy()
 
@@ -40,12 +41,12 @@ def add_user():
         client_id (int): id пользователя из телеги
         name (str): имя пользователя
     """
-    logging.info('add_user')
+    logger.info('add_user')
     answer = utils.json_template.copy()
     request_data = request.get_json()
 
     if 'client_id' not in request_data or 'name' not in request_data:
-        logging.error(f'invalid params in add_user: request_data = {request_data}')
+        logger.error(f'invalid params in add_user: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and name not presented'
         return jsonify(answer)
@@ -57,7 +58,7 @@ def add_user():
         AddClient().execute(client_id, name)
         UpdateClientAmount().execute(client_id, DAY_PAY * 2)
     except (ValueError, ex.ClientAlreadyExist) as e:
-        logging.error(f'add client: client_id = {client_id}, ex = {e}, name = {name}')
+        logger.error(f'add client: client_id = {client_id}, ex = {e}, name = {name}')
         answer['status'] = False
         answer['data'] = str(e)
 
@@ -70,12 +71,12 @@ def get_client(client_id: int):
     Args:
         client_id (int): id пользователя из телеги
     """
-    logging.info('get_client')
+    logger.info('get_client')
     answer = utils.json_template.copy()
 
     client = GetClientById().execute(client_id)
     if client is None:
-        logging.error(f'Client not found: client_id = {client_id}')
+        logger.error(f'Client not found: client_id = {client_id}')
         answer['status'] = False
         answer['data'] = 'User not found'
         return jsonify(answer)

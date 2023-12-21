@@ -12,17 +12,17 @@ import debit
 import multiprocessing as mp
 import configparser
 import logging
-from logging.handlers import QueueHandler, QueueListener
 import bot
-from functools import wraps
-import os
-import time
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 db_config = config['database']
 
 app = Flask(__name__)
+
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers.extend(gunicorn_logger.handlers)
+app.logger.setLevel(gunicorn_logger.level)
 
 
 app.register_blueprint(client_api)
@@ -38,6 +38,7 @@ json_template = utils.json_template
 @app.route('/api/v1.0/check', methods=['GET'])
 def check():
     "Проверка связи"
+    app.logger.info('check log')
     return jsonify(json_template)
 
 
@@ -45,19 +46,10 @@ dashboard.bind(app)
 
 
 def preload():
-    mp_queue = mp.Queue()
-    lg_handler = logging.FileHandler('app.log')
-    lg_handler.setFormatter(
-        logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    )
-
-    queue_listener = QueueListener(mp_queue, lg_handler)
-    queue_listener.start()
-    
-    p = mp.Process(target=debit.auto_daily_debit, daemon=True, args=(mp_queue,))
+    p = mp.Process(target=debit.auto_daily_debit, daemon=True)
     p.start()
 
-    bot_run_p = mp.Process(target=bot.main, daemon=True, args=(mp_queue,))
+    bot_run_p = mp.Process(target=bot.main, daemon=True)
     bot_run_p.start()
 
     Connection.db = DataBaseManager(db_config['dbname'], db_config['user'], db_config['password'])

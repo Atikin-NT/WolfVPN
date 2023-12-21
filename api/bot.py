@@ -28,9 +28,11 @@ TOKEN = bot_config['key']
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
 
+logger = logging.getLogger('gunicorn.error')
+
 
 async def send_file_to_user(client_id, input_file):
-    logging.info(f'sent file to user where client_id = {client_id}, is_test={is_test}')
+    logger.info(f'sent file to user where client_id = {client_id}, is_test={is_test}')
     await bot.session.close()
     await bot.send_document(client_id, document=input_file)
 
@@ -57,12 +59,8 @@ async def run_bot():
     await dp.start_polling(bot)
 
 
-def main(mp_queue):
-    queue_handler = QueueHandler(mp_queue)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.addHandler(queue_handler)
-    logging.info(f'run bot PID = {os.getpid()}, PPID = {os.getppid()}')
+def main():
+    logger.info(f'run bot PID = {os.getpid()}, PPID = {os.getppid()}')
     asyncio.run(run_bot())
 
 # https://telegra.ph/WolfVPN-Tutorial-11-30

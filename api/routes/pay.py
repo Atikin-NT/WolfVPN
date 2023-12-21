@@ -24,6 +24,8 @@ yoomoney_secret = yoomoney_config['secret']
 
 pay_api = Blueprint('pay_api', __name__)
 
+logger = logging.getLogger('gunicorn.error')
+
 
 def create_order(client_id: int, amount: int, order_id: int) -> str:
     h = {
@@ -48,7 +50,7 @@ def create_order(client_id: int, amount: int, order_id: int) -> str:
         json=payload
     )
 
-    logging.info(f'{r}')
+    logger.info(f'{r}')
 
     if r.status_code != 200:
         raise InterruptedError("can't create order")
@@ -56,7 +58,7 @@ def create_order(client_id: int, amount: int, order_id: int) -> str:
     order_data = r.json()
 
     if order_data['status'] != 'SUCCESS':
-        logging.error(f'Cant create order, msg={order_data["message"]}')
+        logger.error(f'Cant create order, msg={order_data["message"]}')
         raise InterruptedError("can't create order status error")
 
     return order_data['data']['directPayLink']
@@ -82,12 +84,12 @@ def create_bill():
         client_id (int): id пользователя из телеги
         amount (int): сумма чека
     """
-    logging.info('create_bill')
+    logger.info('create_bill')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if ('client_id' not in request_data or 'amount' not in request_data or 'type' not in request_data
         or int(request_data['amount']) < 0 or int(request_data['amount']) > 500):
-        logging.error(f'invalid params in create_bill: request_data = {request_data}')
+        logger.error(f'invalid params in create_bill: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and amount not presented'
         return jsonify(answer)
@@ -107,7 +109,7 @@ def create_bill():
 
         answer['data'] = {'bill': create_order_url}
     except (ex.ClientNotExist, ValueError) as e:
-        logging.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
+        logger.error(f'Add bill and quickpay: client_id = {client_id}, amount = {amount}, ex = {e}')
         answer['status'] = False
         answer['data'] = str(e)
 
@@ -122,18 +124,18 @@ def coupon_activate():
         client_id (int): id пользователя из телеги
         coupon (int): купон
     """
-    logging.info('coupon_activate')
+    logger.info('coupon_activate')
     answer = utils.json_template.copy()
     request_data = request.get_json()
     if 'client_id' not in request_data or 'coupon' not in request_data or len(request_data['coupon'].strip()) != 7:
-        logging.error(f'invalid params in coupon_activate: request_data = {request_data}')
+        logger.error(f'invalid params in coupon_activate: request_data = {request_data}')
         answer['status'] = False
         answer['data'] = 'Client id and coupon not presented'
         return jsonify(answer)
 
     client_id = int(request_data['client_id'])
     coupon = str(request_data['coupon'])
-    logging.info(f'coupon = {coupon}')
+    logger.info(f'coupon = {coupon}')
     answer['data'] = 'ok'
 
     try:
@@ -154,7 +156,7 @@ def coupon_activate():
             amount=int(code['amount']) + int(client['amount'])
         )
     except ValueError as e:
-        logging.error(f'activate code and update amount: client_id = {client_id}, coupon = {coupon}, ex = {e}')
+        logger.error(f'activate code and update amount: client_id = {client_id}, coupon = {coupon}, ex = {e}')
         answer['status'] = False
         answer['data'] = str(e)
     
@@ -172,7 +174,7 @@ def get_pay():
     body = request.get_json()
     r_data = request.data
 
-    logging.info(f'get_pay: timestamp = {timestamp}, wallet_sign = {wallet_sign}, body = {body}')
+    logger.info(f'get_pay: timestamp = {timestamp}, wallet_sign = {wallet_sign}, body = {body}')
 
     sign = compute_signature(
         wpayStoreApiKey = wallet_api,
@@ -182,7 +184,7 @@ def get_pay():
         body = r_data
     )
 
-    logging.info(f'get_pay: sign = {sign}')
+    logger.info(f'get_pay: sign = {sign}')
     body = body[0]
 
     if wallet_sign != sign:
@@ -231,10 +233,10 @@ def get_pay_yoomoney():
     amount = int(float(form_data['withdraw_amount']))
     bill_id = form_data['label']
 
-    logging.info(f'get_pay(yoomoney): withdraw_amount = {amount}, bill_id = {bill_id}, form_data = {form_data}')
+    logger.info(f'get_pay(yoomoney): withdraw_amount = {amount}, bill_id = {bill_id}, form_data = {form_data}')
 
     if yoomoney_sign_check(form_data) is False:
-        logging.error('Sign not equal in yoomoney')
+        logger.error('Sign not equal in yoomoney')
         raise InterruptedError('Sign not equal in yoomoney')
 
     bill = GetBillById().execute(bill_id)
@@ -255,5 +257,5 @@ def yoomoney_sign_check(data: dict) -> bool:
     string_for_test = f"""{data['notification_type']}&{data['operation_id']}&{data['amount']}&{data['currency']}&{data['datetime']}&{data['sender']}&{data['codepro']}&{yoomoney_secret}&{data['label']}"""
     sha_code = hashlib.sha1(string_for_test.encode())
     sign = sha_code.hexdigest()
-    logging.info(f'Yoomoney sign: sign = {sign}, sha1_hash = {data["sha1_hash"]}')
+    logger.info(f'Yoomoney sign: sign = {sign}, sha1_hash = {data["sha1_hash"]}')
     return sign == data['sha1_hash']
