@@ -4,6 +4,9 @@
 # logs
 *.log
 
+# txt
+*.txt
+
 # python cache
 /tests/__pycache__/
 /tests/wireguard/__pycache__

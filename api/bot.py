@@ -26,6 +26,7 @@ else:
 TOKEN = bot_config['key']
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
+BROADCAST_FILE = 'msg.txt'
 
 logger = logging.getLogger('gunicorn.error')
 
@@ -83,6 +84,44 @@ async def cmd_help(message: types.Message):
         HELP_MSG,
         parse_mode=ParseMode.HTML
     )
+
+
+async def send_mess_to_user(client_id: int, text: str):
+    await bot.session.close()
+    await bot.send_message(
+        chat_id=client_id,
+        text=text
+    )
+
+
+@dp.message(Command("create_mess"))
+async def broadcast(message: types.Message):
+    msg_without_command = message.html_text.replace('/create_mess', '')
+    clear_msg = msg_without_command.strip()
+    
+    with open(BROADCAST_FILE, 'w') as file:
+        file.write(clear_msg)
+    
+    await message.answer('Сообщение сохранено')
+
+
+@dp.message(Command("show_mess"))
+async def broadcast(message: types.Message):
+    if os.path.isfile(BROADCAST_FILE) is False:
+        await message.answer('Файл сообщений отсутсвует')
+        return
+    
+    with open(BROADCAST_FILE, 'r') as file:
+        msg = file.readlines()
+    
+    msg = ''.join(msg)
+
+    if len(msg.strip()) == 0:
+        await message.answer('Файл сообщений пустой')
+        return
+    
+    await message.answer(msg, parse_mode=ParseMode.HTML)
+
 
 async def run_bot():
     await dp.start_polling(bot)
