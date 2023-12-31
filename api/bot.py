@@ -26,7 +26,7 @@ else:
 TOKEN = bot_config['key']
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
-BROADCAST_FILE = 'msg.txt'
+BROADCAST_FILE = str(config['sendmass']['file'])
 
 logger = logging.getLogger('gunicorn.error')
 
@@ -90,7 +90,8 @@ async def send_mess_to_user(client_id: int, text: str):
     await bot.session.close()
     await bot.send_message(
         chat_id=client_id,
-        text=text
+        text=text,
+        parse_mode=ParseMode.HTML
     )
 
 

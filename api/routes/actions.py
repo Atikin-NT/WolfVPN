@@ -2,14 +2,22 @@ from flask import Blueprint, jsonify, request
 from db.peers import GetPeerById
 from db.pay_history import GetClietnHistory
 from db.hosts import GetAllHosts
+from db.clients import GetAllClients
 from aiogram.types.input_file import BufferedInputFile
 import asyncio
-from bot import send_file_to_user
+import configparser
+from bot import send_file_to_user, send_mess_to_user
 import utils
+import os
 import logging
 
 action_api = Blueprint('action_api', __name__)
 logger = logging.getLogger('gunicorn.error')
+
+config = configparser.ConfigParser()
+config.read('./config.ini')
+MASS_KEY = str(config['sendmass']['key'])
+BROADCAST_FILE = str(config['sendmass']['file'])
 
 
 @action_api.route('/api/v1.0/region_list', methods=['GET'])
@@ -117,4 +125,43 @@ def download():
     asyncio.run(send_file_to_user(client_id, input_file))
 
     answer['data'] = 'ok'
+    return jsonify(answer)
+
+
+@action_api.route('/api/v1.0/massmess/<key>', methods=['GET'])
+def massmess(key: str):
+    """отправка сообщения всем пользователям системы
+
+    Args:
+        key (str): ключ для отправки
+    """
+    answer = utils.json_template.copy()
+    if key != MASS_KEY:
+        answer['status'] = False
+        answer['data'] = 'Invalid key for massmess'
+        return jsonify(answer)
+    
+    if os.path.isfile(BROADCAST_FILE) is False:
+        answer['status'] = False
+        answer['data'] = 'File nor found'
+        return jsonify(answer)
+    
+    with open(BROADCAST_FILE, 'r') as file:
+        msg = file.readlines()
+    
+    msg = ''.join(msg)
+
+    if len(msg.strip()) == 0:
+        answer['status'] = False
+        answer['data'] = 'File nor found'
+        return jsonify(answer)
+    
+    user_list = GetAllClients().execute()
+
+    for user in user_list:
+        client_id = user['id']
+        asyncio.run(send_mess_to_user(client_id, msg))
+        
+    answer['data'] = f'Message was send to {len(user_list)} users'
+
     return jsonify(answer)
