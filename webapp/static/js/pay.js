@@ -14,7 +14,7 @@ function isNotEmpty(field){
 
 function open_bill(bill_url){
     tg.openLink(bill_url);
-    tg.showAlert('После успешной оплаты ваш счет пополнится автоматически. Если этого не так, то напишите в тех поддержку.', function() {
+    tg.showAlert('После успешной оплаты ваш счет пополнится автоматически. Если этого не произошло, то напишите в тех поддержку.', function() {
         window.location.replace(WEB_APP__URL + '/main');
     })
 }
