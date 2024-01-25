@@ -16,4 +16,4 @@ RUN apk update && apk add python3-dev \
 
 RUN pip install -r requirements.txt
 
-CMD ["gunicorn", "--certfile", "ssl.crt", "--keyfile", "ssl.key", "-b", "0.0.0.0:8443", "--workers", "1", "app:app", "--preload", "--error-logfile", "app.log", "--log-level", "debug", "--timeout", "0"]
+CMD ["gunicorn", "--ssl-version", "TLSv1_3" "--certfile", "ssl.crt", "--keyfile", "ssl.key", "-b", "0.0.0.0:8443", "--workers", "1", "app:app", "--error-logfile", "app.log", "--log-level", "debug", "--timeout", "0", "-c", "gunicorn.conf.py"]
