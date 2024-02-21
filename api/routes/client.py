@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from db.clients import GetClientById, AddClient, UpdateClientAmount
+from db.clients import GetClientById, AddClient, UpdateClientAmount, GetAllClients
 from db.peers import GetPeerByClientId
 from db.hosts import GetAllHosts
 import db.exeption as ex
@@ -10,6 +10,7 @@ import logging
 config = configparser.ConfigParser()
 config.read('./config.ini')
 DAY_PAY = int(config['economic']['day_pay'])
+KEY = config['debit']['key']
 
 client_api = Blueprint('client_api', __name__)
 logger = logging.getLogger('gunicorn.error')
@@ -100,4 +101,55 @@ def get_client(client_id: int):
         'day_left': day_left,
         'peers': client_peers
     }
+    return jsonify(answer)
+
+
+@client_api.route('/api/v1.0/get_all_clients', methods=['POST'])
+def get_all_clients():
+    """полученить список всех клиентов
+    """
+    logger.info('get clients list')
+    answer = utils.json_template.copy()
+
+    request_data = request.get_json()
+    if 'key' not in request_data or request_data['key'] != KEY:
+        logger.error(f'no key in get_all_clients: request_data = {request_data}')
+        answer['status'] = False
+        answer['data'] = 'Key not presented'
+        return jsonify(answer)
+
+    clients = GetAllClients().execute()
+    for client in clients:
+        client['peers'] = []
+        peers = GetPeerByClientId().execute(client['id'])
+        for peer in peers:
+            client['peers'].append({
+                'host_id': peer['host_id']
+            })
+
+    answer['data'] = {'clients': clients}
+
+    return jsonify(answer)
+
+
+@client_api.route('/api/v1.0/update_client_amount', methods=['POST'])
+def update_client_amount():
+    """побновить баланс пользователя
+    """
+    logger.info('update_client_amount')
+    answer = utils.json_template.copy()
+
+    request_data = request.get_json()
+    if 'client_id' not in request_data or 'amount' not in request_data or 'key' not in request_data or request_data['key'] != KEY:
+        logger.error(f'Data not present or not valid: request_data = {request_data}')
+        answer['status'] = False
+        answer['data'] = 'Key not presented'
+        return jsonify(answer)
+    
+    client_id = request_data['client_id']
+    amount = request_data['amount']
+
+    UpdateClientAmount().execute(client_id, amount)
+
+    answer['data'] = 'ok'
     return jsonify(answer)
