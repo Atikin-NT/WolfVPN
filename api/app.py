@@ -1,7 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import utils
-import flask_monitoringdashboard as dashboard
 from routes.client import client_api
 from routes.peer import peer_api
 from routes.pay import pay_api
@@ -37,9 +36,6 @@ def check():
     "Проверка связи"
     app.logger.info('check log')
     return jsonify(json_template)
-
-
-dashboard.bind(app)
 
 
 def preload():
