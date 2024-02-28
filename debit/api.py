@@ -1,5 +1,6 @@
 import requests
 import configparser
+import logging
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -9,6 +10,9 @@ URL = config['url']['api_url']
 
 def get_all_clients_list():
     r = requests.post(URL + '/api/v1.0/get_all_clients', json={'key': KEY})
+    if r.status_code != 200:
+        logging.error(f'status code is {r.status_code} msg:{r.text}')
+        return []
     data = r.json()
     return data['data']['clients']
 
@@ -20,6 +24,7 @@ def remove_peer(client_id: int, host_id: int):
             'host_id': host_id
         })
     if r.status_code != 200:
+        logging.error(f'status code is {r.status_code} msg:{r.text}')
         return False
     data = r.json()
     return data['status']
@@ -34,6 +39,7 @@ def update_client_amount(client_id: int, amount: int):
             'key': KEY
         })
     if r.status_code != 200:
+        logging.error(f'status code is {r.status_code} msg:{r.text}')
         return False
     data = r.json()
     return data['status']
